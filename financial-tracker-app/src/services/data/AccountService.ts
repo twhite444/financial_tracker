@@ -1,39 +1,122 @@
+import { AuthService } from '../auth/AuthService';
+import { Account } from '../../models/Account';
+
+const API_URL = 'http://localhost:5001/api';
+
 export class AccountService {
-    private accounts: Account[] = [];
+    static async getAccounts(): Promise<{ success: boolean; data?: Account[]; error?: string }> {
+        try {
+            const response = await fetch(`${API_URL}/accounts`, {
+                method: 'GET',
+                headers: AuthService.getAuthHeaders(),
+            });
 
-    constructor(private databaseService: DatabaseService) {}
+            const data = await response.json();
 
-    async createAccount(account: Account): Promise<Account> {
-        const newAccount = await this.databaseService.insert('accounts', account);
-        this.accounts.push(newAccount);
-        return newAccount;
-    }
-
-    async getAccounts(): Promise<Account[]> {
-        if (this.accounts.length === 0) {
-            this.accounts = await this.databaseService.fetchAll('accounts');
-        }
-        return this.accounts;
-    }
-
-    async updateAccount(accountId: string, updatedAccount: Partial<Account>): Promise<Account | null> {
-        const updated = await this.databaseService.update('accounts', accountId, updatedAccount);
-        if (updated) {
-            const index = this.accounts.findIndex(acc => acc.id === accountId);
-            if (index !== -1) {
-                this.accounts[index] = { ...this.accounts[index], ...updatedAccount };
+            if (response.ok) {
+                return { success: true, data: data.accounts };
+            } else {
+                return { success: false, error: data.error || 'Failed to fetch accounts' };
             }
-            return { ...this.accounts[index], ...updatedAccount };
+        } catch (error) {
+            return { success: false, error: 'Network error occurred' };
         }
-        return null;
     }
 
-    async deleteAccount(accountId: string): Promise<boolean> {
-        const deleted = await this.databaseService.delete('accounts', accountId);
-        if (deleted) {
-            this.accounts = this.accounts.filter(acc => acc.id !== accountId);
-            return true;
+    static async getAccount(accountId: string): Promise<{ success: boolean; data?: Account; error?: string }> {
+        try {
+            const response = await fetch(`${API_URL}/accounts/${accountId}`, {
+                method: 'GET',
+                headers: AuthService.getAuthHeaders(),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                return { success: true, data: data.account };
+            } else {
+                return { success: false, error: data.error || 'Failed to fetch account' };
+            }
+        } catch (error) {
+            return { success: false, error: 'Network error occurred' };
         }
-        return false;
+    }
+
+    static async createAccount(account: Omit<Account, 'id'>): Promise<{ success: boolean; data?: Account; error?: string }> {
+        try {
+            const response = await fetch(`${API_URL}/accounts`, {
+                method: 'POST',
+                headers: AuthService.getAuthHeaders(),
+                body: JSON.stringify(account),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                return { success: true, data: data.account };
+            } else {
+                return { success: false, error: data.error || 'Failed to create account' };
+            }
+        } catch (error) {
+            return { success: false, error: 'Network error occurred' };
+        }
+    }
+
+    static async updateAccount(accountId: string, updatedAccount: Partial<Account>): Promise<{ success: boolean; data?: Account; error?: string }> {
+        try {
+            const response = await fetch(`${API_URL}/accounts/${accountId}`, {
+                method: 'PUT',
+                headers: AuthService.getAuthHeaders(),
+                body: JSON.stringify(updatedAccount),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                return { success: true, data: data.account };
+            } else {
+                return { success: false, error: data.error || 'Failed to update account' };
+            }
+        } catch (error) {
+            return { success: false, error: 'Network error occurred' };
+        }
+    }
+
+    static async deleteAccount(accountId: string): Promise<{ success: boolean; error?: string }> {
+        try {
+            const response = await fetch(`${API_URL}/accounts/${accountId}`, {
+                method: 'DELETE',
+                headers: AuthService.getAuthHeaders(),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                return { success: true };
+            } else {
+                return { success: false, error: data.error || 'Failed to delete account' };
+            }
+        } catch (error) {
+            return { success: false, error: 'Network error occurred' };
+        }
+    }
+
+    static async getAccountSummary(): Promise<{ success: boolean; data?: any; error?: string }> {
+        try {
+            const response = await fetch(`${API_URL}/accounts/summary`, {
+                method: 'GET',
+                headers: AuthService.getAuthHeaders(),
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                return { success: true, data: data };
+            } else {
+                return { success: false, error: data.error || 'Failed to fetch account summary' };
+            }
+        } catch (error) {
+            return { success: false, error: 'Network error occurred' };
+        }
     }
 }

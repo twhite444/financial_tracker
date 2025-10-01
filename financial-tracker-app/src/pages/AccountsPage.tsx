@@ -1,53 +1,9 @@
-import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank } from 'lucide-react';
+import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank, Loader2 } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../components/common/Modal';
-
-const mockAccounts = [
-  {
-    id: '1',
-    name: 'Schwab Bank Checking',
-    institution: 'Charles Schwab',
-    type: 'checking',
-    balance: 12500,
-    accountNumber: '****5678',
-  },
-  {
-    id: '2',
-    name: 'Schwab Retirement Savings',
-    institution: 'Charles Schwab',
-    type: 'retirement',
-    balance: 52500,
-    accountNumber: '****9012',
-  },
-  {
-    id: '3',
-    name: 'Capital One Quicksilver',
-    institution: 'Capital One',
-    type: 'credit_card',
-    balance: 1500,
-    creditLimit: 10000,
-    accountNumber: '****3456',
-  },
-  {
-    id: '4',
-    name: 'Discover it Cash Back',
-    institution: 'Discover',
-    type: 'credit_card',
-    balance: 2000,
-    creditLimit: 15000,
-    accountNumber: '****7890',
-  },
-  {
-    id: '5',
-    name: 'Chase Sapphire Preferred',
-    institution: 'Chase',
-    type: 'credit_card',
-    balance: 1000,
-    creditLimit: 12000,
-    accountNumber: '****1234',
-  },
-];
+import { AccountService } from '../services/data/AccountService';
+import { Account } from '../models/Account';
 
 const accountTypeConfig = {
   checking: { icon: Building2, color: 'bg-blue-100 text-blue-600', label: 'Checking' },
@@ -57,6 +13,9 @@ const accountTypeConfig = {
 };
 
 export default function AccountsPage() {
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selectedType, setSelectedType] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -68,15 +27,31 @@ export default function AccountsPage() {
     accountNumber: '',
   });
 
-  const filteredAccounts = selectedType
-    ? mockAccounts.filter((acc) => acc.type === selectedType)
-    : mockAccounts;
+  useEffect(() => {
+    loadAccounts();
+  }, []);
 
-  const totalBalance = mockAccounts
+  const loadAccounts = async () => {
+    setIsLoading(true);
+    const result = await AccountService.getAccounts();
+    if (result.success && result.data) {
+      setAccounts(result.data);
+      setError('');
+    } else {
+      setError(result.error || 'Failed to load accounts');
+    }
+    setIsLoading(false);
+  };
+
+  const filteredAccounts = selectedType
+    ? accounts.filter((acc) => acc.type === selectedType)
+    : accounts;
+
+  const totalBalance = accounts
     .filter((acc) => acc.type !== 'credit_card')
     .reduce((sum, acc) => sum + acc.balance, 0);
 
-  const totalDebt = mockAccounts
+  const totalDebt = accounts
     .filter((acc) => acc.type === 'credit_card')
     .reduce((sum, acc) => sum + acc.balance, 0);
 
@@ -97,7 +72,34 @@ export default function AccountsPage() {
         </button>
       </div>
 
-      {/* Summary Cards */}
+      {/* Error Message */}
+      {error && (
+        <div className="glass-card p-4 bg-red-50 border-red-200">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
+        </div>
+      ) : accounts.length === 0 ? (
+        <div className="glass-card p-12 text-center">
+          <Building2 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No accounts yet</h3>
+          <p className="text-gray-600 mb-6">Get started by adding your first account</p>
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="btn-primary inline-flex items-center gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            Add Account
+          </button>
+        </div>
+      ) : (
+        <>
+          {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="glass-card p-6">
           <p className="text-sm text-gray-600 mb-1">Total Balance</p>
@@ -155,7 +157,19 @@ export default function AccountsPage() {
                   <button className="p-2 hover:bg-white/50 rounded-lg transition-colors">
                     <Edit2 className="h-4 w-4 text-gray-600" />
                   </button>
-                  <button className="p-2 hover:bg-red-50 rounded-lg transition-colors">
+                  <button 
+                    onClick={async () => {
+                      if (window.confirm('Are you sure you want to delete this account?')) {
+                        const result = await AccountService.deleteAccount(account._id || account.id!);
+                        if (result.success) {
+                          await loadAccounts();
+                        } else {
+                          setError(result.error || 'Failed to delete account');
+                        }
+                      }
+                    }}
+                    className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                  >
                     <Trash2 className="h-4 w-4 text-red-600" />
                   </button>
                 </div>
@@ -203,7 +217,9 @@ export default function AccountsPage() {
             </div>
           );
         })}
-      </div>
+        </div>
+        </>
+      )}
 
       {/* Add Account Modal */}
       <Modal
@@ -222,11 +238,36 @@ export default function AccountsPage() {
         title="Add New Account"
       >
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            // TODO: Integrate with AccountService
-            console.log('Adding account:', formData);
-            setIsAddModalOpen(false);
+            const accountData: Omit<Account, 'id'> = {
+              name: formData.name,
+              institution: formData.institution,
+              type: formData.type as Account['type'],
+              balance: parseFloat(formData.balance),
+              currency: 'USD',
+              isActive: true,
+            };
+
+            if (formData.type === 'credit_card' && formData.creditLimit) {
+              accountData.creditLimit = parseFloat(formData.creditLimit);
+            }
+
+            const result = await AccountService.createAccount(accountData);
+            if (result.success) {
+              await loadAccounts();
+              setIsAddModalOpen(false);
+              setFormData({
+                name: '',
+                institution: '',
+                type: 'checking',
+                balance: '',
+                creditLimit: '',
+                accountNumber: '',
+              });
+            } else {
+              setError(result.error || 'Failed to create account');
+            }
           }}
           className="space-y-6"
         >

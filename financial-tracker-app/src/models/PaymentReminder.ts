@@ -1,7 +1,16 @@
 export interface PaymentReminder {
-    id: string;
-    dueDate: Date;
+    _id?: string;
+    id?: string;
+    userId?: string;
+    accountId: string;
+    title: string;
     amount: number;
-    description?: string;
+    dueDate: Date | string;
+    recurring: boolean;
+    frequency?: 'weekly' | 'biweekly' | 'monthly' | 'quarterly' | 'yearly';
     isPaid: boolean;
+    paidDate?: Date | string;
+    description?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }

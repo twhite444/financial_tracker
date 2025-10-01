@@ -1,8 +1,15 @@
 export interface Transaction {
-    id: string;
+    _id?: string;
+    id?: string;
+    userId?: string;
+    accountId: string;
+    type: 'income' | 'expense';
+    category: string;
     amount: number;
-    date: Date;
     description: string;
-    accountId: string; // Reference to the associated account
-    category?: string; // Optional category for the transaction
+    date: Date | string;
+    merchant?: string;
+    tags?: string[];
+    createdAt?: Date;
+    updatedAt?: Date;
 }

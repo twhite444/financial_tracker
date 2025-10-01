@@ -1,9 +1,15 @@
 export interface Account {
-    id: string;
-    accountType: string;
-    balance: number;
-    currency: string;
+    _id?: string;
+    id?: string;
+    userId?: string;
+    name: string;
+    type: 'checking' | 'savings' | 'credit_card' | 'investment' | 'loan';
     institution: string;
-    createdAt: Date;
-    updatedAt: Date;
+    balance: number;
+    creditLimit?: number;
+    currency?: string;
+    isActive?: boolean;
+    accountNumber?: string;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
