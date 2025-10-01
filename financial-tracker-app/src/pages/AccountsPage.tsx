@@ -58,6 +58,15 @@ const accountTypeConfig = {
 
 export default function AccountsPage() {
   const [selectedType, setSelectedType] = useState<string | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    institution: '',
+    type: 'checking',
+    balance: '',
+    creditLimit: '',
+    accountNumber: '',
+  });
 
   const filteredAccounts = selectedType
     ? mockAccounts.filter((acc) => acc.type === selectedType)
@@ -79,7 +88,10 @@ export default function AccountsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Accounts</h1>
           <p className="text-gray-600 mt-1">Manage your bank accounts and credit cards</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="btn-primary flex items-center gap-2"
+        >
           <Plus className="h-5 w-5" />
           Add Account
         </button>
@@ -192,6 +204,156 @@ export default function AccountsPage() {
           );
         })}
       </div>
+
+      {/* Add Account Modal */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setFormData({
+            name: '',
+            institution: '',
+            type: 'checking',
+            balance: '',
+            creditLimit: '',
+            accountNumber: '',
+          });
+        }}
+        title="Add New Account"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            // TODO: Integrate with AccountService
+            console.log('Adding account:', formData);
+            setIsAddModalOpen(false);
+          }}
+          className="space-y-6"
+        >
+          {/* Account Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Account Name *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Schwab Checking"
+              className="glass-input"
+            />
+          </div>
+
+          {/* Institution */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Financial Institution *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.institution}
+              onChange={(e) => setFormData({ ...formData, institution: e.target.value })}
+              placeholder="e.g., Charles Schwab"
+              className="glass-input"
+            />
+          </div>
+
+          {/* Account Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Account Type *
+            </label>
+            <select
+              value={formData.type}
+              onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+              className="glass-input"
+            >
+              <option value="checking">Checking</option>
+              <option value="savings">Savings</option>
+              <option value="retirement">Retirement</option>
+              <option value="credit_card">Credit Card</option>
+            </select>
+          </div>
+
+          {/* Account Number (Last 4 digits) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Account Number (Last 4 digits) *
+            </label>
+            <input
+              type="text"
+              required
+              maxLength={4}
+              value={formData.accountNumber}
+              onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value.replace(/\D/g, '') })}
+              placeholder="1234"
+              className="glass-input"
+            />
+          </div>
+
+          {/* Balance */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              {formData.type === 'credit_card' ? 'Current Balance Owed' : 'Current Balance'} *
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+                $
+              </span>
+              <input
+                type="number"
+                required
+                step="0.01"
+                min="0"
+                value={formData.balance}
+                onChange={(e) => setFormData({ ...formData, balance: e.target.value })}
+                placeholder="0.00"
+                className="glass-input pl-8"
+              />
+            </div>
+          </div>
+
+          {/* Credit Limit (only for credit cards) */}
+          {formData.type === 'credit_card' && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Credit Limit *
+              </label>
+              <div className="relative">
+                <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+                  $
+                </span>
+                <input
+                  type="number"
+                  required
+                  step="0.01"
+                  min="0"
+                  value={formData.creditLimit}
+                  onChange={(e) => setFormData({ ...formData, creditLimit: e.target.value })}
+                  placeholder="0.00"
+                  className="glass-input pl-8"
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Form Actions */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="btn-secondary flex-1"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary flex-1">
+              Add Account
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

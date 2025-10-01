@@ -1,6 +1,7 @@
 import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState } from 'react';
+import Modal from '../components/common/Modal';
 
 const mockTransactions = [
   {
@@ -113,6 +114,15 @@ export default function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedAccount, setSelectedAccount] = useState('All Accounts');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    description: '',
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    category: 'Groceries',
+    account: 'Schwab Checking',
+    type: 'expense',
+  });
 
   const filteredTransactions = mockTransactions.filter((tx) => {
     const matchesSearch = tx.description.toLowerCase().includes(searchQuery.toLowerCase());
@@ -142,7 +152,10 @@ export default function TransactionsPage() {
             <Download className="h-5 w-5" />
             Export
           </button>
-          <button className="btn-primary flex items-center gap-2">
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="btn-primary flex items-center gap-2"
+          >
             <Plus className="h-5 w-5" />
             Add Transaction
           </button>

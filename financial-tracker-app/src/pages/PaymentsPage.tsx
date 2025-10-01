@@ -2,6 +2,7 @@ import { Plus, Calendar, Check, Clock, AlertCircle, Repeat } from 'lucide-react'
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState } from 'react';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, isToday, isBefore, startOfDay } from 'date-fns';
+import Modal from '../components/common/Modal';
 
 const mockPayments = [
   {
@@ -66,6 +67,15 @@ const categoryColors = {
 export default function PaymentsPage() {
   const [currentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    name: '',
+    amount: '',
+    dueDate: '',
+    recurring: false,
+    frequency: 'monthly',
+    category: 'credit_card',
+  });
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -93,7 +103,10 @@ export default function PaymentsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Payment Calendar</h1>
           <p className="text-gray-600 mt-1">Track and manage upcoming payment due dates</p>
         </div>
-        <button className="btn-primary flex items-center gap-2">
+        <button 
+          onClick={() => setIsAddModalOpen(true)}
+          className="btn-primary flex items-center gap-2"
+        >
           <Plus className="h-5 w-5" />
           Add Reminder
         </button>
@@ -259,6 +272,148 @@ export default function PaymentsPage() {
           </div>
         </div>
       </div>
+
+      {/* Add Payment Reminder Modal */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setFormData({
+            name: '',
+            amount: '',
+            dueDate: '',
+            recurring: false,
+            frequency: 'monthly',
+            category: 'credit_card',
+          });
+        }}
+        title="Add Payment Reminder"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            // TODO: Integrate with PaymentService
+            console.log('Adding payment reminder:', formData);
+            setIsAddModalOpen(false);
+          }}
+          className="space-y-6"
+        >
+          {/* Payment Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Payment Name *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="e.g., Capital One Credit Card"
+              className="glass-input"
+            />
+          </div>
+
+          {/* Amount */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Amount *
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+                $
+              </span>
+              <input
+                type="number"
+                required
+                step="0.01"
+                min="0"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                placeholder="0.00"
+                className="glass-input pl-8"
+              />
+            </div>
+          </div>
+
+          {/* Due Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Due Date *
+            </label>
+            <input
+              type="date"
+              required
+              value={formData.dueDate}
+              onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+              className="glass-input"
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category *
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="glass-input"
+            >
+              <option value="credit_card">Credit Card</option>
+              <option value="utilities">Utilities</option>
+              <option value="subscription">Subscription</option>
+              <option value="insurance">Insurance</option>
+            </select>
+          </div>
+
+          {/* Recurring */}
+          <div className="flex items-center gap-3">
+            <input
+              type="checkbox"
+              id="recurring"
+              checked={formData.recurring}
+              onChange={(e) => setFormData({ ...formData, recurring: e.target.checked })}
+              className="h-4 w-4 text-accent-blue focus:ring-accent-blue border-gray-300 rounded"
+            />
+            <label htmlFor="recurring" className="text-sm font-medium text-gray-700">
+              This is a recurring payment
+            </label>
+          </div>
+
+          {/* Frequency (only if recurring) */}
+          {formData.recurring && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Frequency *
+              </label>
+              <select
+                value={formData.frequency}
+                onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                className="glass-input"
+              >
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="quarterly">Quarterly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+          )}
+
+          {/* Form Actions */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="btn-secondary flex-1"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary flex-1">
+              Add Reminder
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
