@@ -1,103 +1,13 @@
-import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2 } from 'lucide-react';
+import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '../components/common/Modal';
-
-const mockTransactions = [
-  {
-    id: '1',
-    date: new Date(2024, 0, 14),
-    description: 'Grocery Store',
-    category: 'Groceries',
-    amount: -127.50,
-    type: 'expense',
-    account: 'Schwab Checking',
-  },
-  {
-    id: '2',
-    date: new Date(2024, 0, 13),
-    description: 'Monthly Salary',
-    category: 'Income',
-    amount: 5000.00,
-    type: 'income',
-    account: 'Schwab Checking',
-  },
-  {
-    id: '3',
-    date: new Date(2024, 0, 12),
-    description: 'Gas Station',
-    category: 'Transportation',
-    amount: -45.00,
-    type: 'expense',
-    account: 'Capital One Quicksilver',
-  },
-  {
-    id: '4',
-    date: new Date(2024, 0, 11),
-    description: 'Netflix Subscription',
-    category: 'Entertainment',
-    amount: -15.99,
-    type: 'expense',
-    account: 'Discover it Cash Back',
-  },
-  {
-    id: '5',
-    date: new Date(2024, 0, 10),
-    description: 'Restaurant',
-    category: 'Dining',
-    amount: -68.25,
-    type: 'expense',
-    account: 'Chase Sapphire',
-  },
-  {
-    id: '6',
-    date: new Date(2024, 0, 9),
-    description: 'Amazon Purchase',
-    category: 'Shopping',
-    amount: -234.99,
-    type: 'expense',
-    account: 'Capital One Quicksilver',
-  },
-  {
-    id: '7',
-    date: new Date(2024, 0, 8),
-    description: 'Freelance Project',
-    category: 'Income',
-    amount: 800.00,
-    type: 'income',
-    account: 'Schwab Checking',
-  },
-  {
-    id: '8',
-    date: new Date(2024, 0, 7),
-    description: 'Gym Membership',
-    category: 'Health',
-    amount: -50.00,
-    type: 'expense',
-    account: 'Schwab Checking',
-  },
-  {
-    id: '9',
-    date: new Date(2024, 0, 6),
-    description: 'Coffee Shop',
-    category: 'Dining',
-    amount: -12.50,
-    type: 'expense',
-    account: 'Discover it Cash Back',
-  },
-  {
-    id: '10',
-    date: new Date(2024, 0, 5),
-    description: 'Utility Bill',
-    category: 'Utilities',
-    amount: -85.00,
-    type: 'expense',
-    account: 'Schwab Checking',
-  },
-];
+import { TransactionService } from '../services/data/TransactionService';
+import { AccountService } from '../services/data/AccountService';
+import { Transaction } from '../models/Transaction';
+import { Account } from '../models/Account';
 
 const categories = ['All', 'Income', 'Groceries', 'Dining', 'Shopping', 'Transportation', 'Entertainment', 'Health', 'Utilities'];
-const accounts = ['All Accounts', 'Schwab Checking', 'Schwab Retirement', 'Capital One Quicksilver', 'Discover it Cash Back', 'Chase Sapphire'];
 
 const categoryColors: Record<string, string> = {
   Income: 'bg-green-100 text-green-700 border-green-200',
@@ -111,6 +21,10 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function TransactionsPage() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedAccount, setSelectedAccount] = useState('All Accounts');
@@ -120,14 +34,39 @@ export default function TransactionsPage() {
     amount: '',
     date: new Date().toISOString().split('T')[0],
     category: 'Groceries',
-    account: 'Schwab Checking',
-    type: 'expense',
+    accountId: '',
+    type: 'expense' as 'income' | 'expense',
   });
 
-  const filteredTransactions = mockTransactions.filter((tx) => {
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    const [txResult, accResult] = await Promise.all([
+      TransactionService.getTransactions(),
+      AccountService.getAccounts()
+    ]);
+
+    if (txResult.success && txResult.data) {
+      setTransactions(txResult.data.transactions);
+    } else {
+      setError(txResult.error || 'Failed to load transactions');
+    }
+
+    if (accResult.success && accResult.data) {
+      setAccounts(accResult.data);
+    }
+
+    setIsLoading(false);
+  };
+
+  const filteredTransactions = transactions.filter((tx) => {
     const matchesSearch = tx.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesCategory = selectedCategory === 'All' || tx.category === selectedCategory;
-    const matchesAccount = selectedAccount === 'All Accounts' || tx.account === selectedAccount;
+    const matchesAccount = selectedAccount === 'All Accounts' || 
+      (tx.accountId === selectedAccount || accounts.find(a => (a._id || a.id) === tx.accountId)?.name === selectedAccount);
     return matchesSearch && matchesCategory && matchesAccount;
   });
 
@@ -137,7 +76,7 @@ export default function TransactionsPage() {
 
   const totalExpenses = filteredTransactions
     .filter((tx) => tx.type === 'expense')
-    .reduce((sum, tx) => sum + Math.abs(tx.amount), 0);
+    .reduce((sum, tx) => sum + tx.amount, 0);
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -225,30 +164,52 @@ export default function TransactionsPage() {
             Account
           </label>
           <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            <button
+              onClick={() => setSelectedAccount('All Accounts')}
+              className={`glass-button whitespace-nowrap ${
+                selectedAccount === 'All Accounts' ? 'bg-accent-blue text-white' : ''
+              }`}
+            >
+              All Accounts
+            </button>
             {accounts.map((account) => (
               <button
-                key={account}
-                onClick={() => setSelectedAccount(account)}
+                key={account._id || account.id}
+                onClick={() => setSelectedAccount(account.name)}
                 className={`glass-button whitespace-nowrap ${
-                  selectedAccount === account ? 'bg-accent-blue text-white' : ''
+                  selectedAccount === account.name ? 'bg-accent-blue text-white' : ''
                 }`}
               >
-                {account}
+                {account.name}
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Transactions List */}
-      <div className="glass-card overflow-hidden">
-        {filteredTransactions.length === 0 ? (
-          <div className="p-12 text-center">
-            <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <p className="text-gray-500 text-lg">No transactions found</p>
-            <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or add a new transaction</p>
-          </div>
-        ) : (
+      {/* Error Message */}
+      {error && (
+        <div className="glass-card p-4 bg-red-50 border-red-200">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
+        </div>
+      ) : (
+        <>
+          {/* Transactions List */}
+          <div className="glass-card overflow-hidden">
+            {filteredTransactions.length === 0 ? (
+              <div className="p-12 text-center">
+                <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                <p className="text-gray-500 text-lg">No transactions found</p>
+                <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or add a new transaction</p>
+              </div>
+            ) : (
           <div className="divide-y divide-gray-100">
             {filteredTransactions.map((transaction) => (
               <div
@@ -287,7 +248,7 @@ export default function TransactionsPage() {
                           {transaction.category}
                         </span>
                         <span className="text-xs text-gray-400">
-                          {transaction.account}
+                          {accounts.find(a => (a._id || a.id) === transaction.accountId)?.name || 'Unknown'}
                         </span>
                       </div>
                     </div>
@@ -311,13 +272,15 @@ export default function TransactionsPage() {
         )}
       </div>
 
-      {/* Pagination placeholder */}
-      {filteredTransactions.length > 0 && (
-        <div className="flex justify-center">
-          <div className="glass-button">
-            Showing {filteredTransactions.length} of {mockTransactions.length} transactions
-          </div>
-        </div>
+          {/* Pagination placeholder */}
+          {filteredTransactions.length > 0 && (
+            <div className="flex justify-center">
+              <div className="glass-button">
+                Showing {filteredTransactions.length} of {transactions.length} transactions
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* Add Transaction Modal */}
@@ -330,18 +293,39 @@ export default function TransactionsPage() {
             amount: '',
             date: new Date().toISOString().split('T')[0],
             category: 'Groceries',
-            account: 'Schwab Checking',
+            accountId: accounts[0]?._id || accounts[0]?.id || '',
             type: 'expense',
           });
         }}
         title="Add Transaction"
       >
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            // TODO: Integrate with TransactionService
-            console.log('Adding transaction:', formData);
-            setIsAddModalOpen(false);
+            const transactionData: Omit<Transaction, '_id' | 'id'> = {
+              description: formData.description,
+              amount: parseFloat(formData.amount),
+              date: formData.date || new Date().toISOString(),
+              category: formData.category,
+              accountId: formData.accountId,
+              type: formData.type,
+            };
+
+            const result = await TransactionService.createTransaction(transactionData);
+            if (result.success) {
+              await loadData();
+              setIsAddModalOpen(false);
+              setFormData({
+                description: '',
+                amount: '',
+                date: new Date().toISOString().split('T')[0],
+                category: 'Groceries',
+                accountId: accounts[0]?._id || accounts[0]?.id || '',
+                type: 'expense',
+              });
+            } else {
+              setError(result.error || 'Failed to create transaction');
+            }
           }}
           className="space-y-6"
         >
@@ -461,15 +445,17 @@ export default function TransactionsPage() {
               Account *
             </label>
             <select
-              value={formData.account}
-              onChange={(e) => setFormData({ ...formData, account: e.target.value })}
+              value={formData.accountId}
+              onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
               className="glass-input"
+              required
             >
-              <option value="Schwab Checking">Schwab Checking</option>
-              <option value="Schwab Retirement">Schwab Retirement</option>
-              <option value="Capital One Quicksilver">Capital One Quicksilver</option>
-              <option value="Discover it Cash Back">Discover it Cash Back</option>
-              <option value="Chase Sapphire">Chase Sapphire</option>
+              <option value="">Select an account</option>
+              {accounts.map((account) => (
+                <option key={account._id || account.id} value={account._id || account.id}>
+                  {account.name}
+                </option>
+              ))}
             </select>
           </div>
 
