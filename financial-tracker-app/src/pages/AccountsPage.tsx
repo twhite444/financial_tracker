@@ -1,6 +1,7 @@
 import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 import { useState } from 'react';
+import Modal from '../components/common/Modal';
 
 const mockAccounts = [
   {
