@@ -1,5 +1,6 @@
 import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
+import { LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 const stats = [
   {
@@ -44,6 +45,36 @@ const recentTransactions = [
   { id: 5, description: 'Restaurant', amount: -68.50, date: '2025-09-26', category: 'Dining' },
 ];
 
+// Balance trend data (last 6 months)
+const balanceTrendData = [
+  { month: 'Apr', balance: 58000 },
+  { month: 'May', balance: 61500 },
+  { month: 'Jun', balance: 59800 },
+  { month: 'Jul', balance: 63200 },
+  { month: 'Aug', balance: 62000 },
+  { month: 'Sep', balance: 65000 },
+];
+
+// Spending by category data
+const spendingData = [
+  { name: 'Groceries', value: 450, color: '#3B82F6' },
+  { name: 'Dining', value: 320, color: '#F59E0B' },
+  { name: 'Transportation', value: 180, color: '#10B981' },
+  { name: 'Utilities', value: 250, color: '#6366F1' },
+  { name: 'Entertainment', value: 150, color: '#EC4899' },
+  { name: 'Shopping', value: 280, color: '#8B5CF6' },
+];
+
+// Net worth trend data
+const netWorthData = [
+  { month: 'Apr', netWorth: 75000 },
+  { month: 'May', netWorth: 78500 },
+  { month: 'Jun', netWorth: 80200 },
+  { month: 'Jul', netWorth: 83000 },
+  { month: 'Aug', netWorth: 85500 },
+  { month: 'Sep', netWorth: 87500 },
+];
+
 export default function DashboardPage() {
   return (
     <div className="space-y-8 animate-fade-in">
@@ -79,6 +110,76 @@ export default function DashboardPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Balance Trend Chart */}
+        <div className="glass-card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Balance Trend</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={balanceTrendData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
+              <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+              <Tooltip 
+                formatter={(value: number) => formatCurrency(value)}
+                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+              />
+              <Line type="monotone" dataKey="balance" stroke="#3B82F6" strokeWidth={3} dot={{ fill: '#3B82F6', r: 4 }} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Spending Breakdown Pie Chart */}
+        <div className="glass-card p-6">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Spending Breakdown</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <PieChart>
+              <Pie
+                data={spendingData}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+              >
+                {spendingData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={entry.color} />
+                ))}
+              </Pie>
+              <Tooltip 
+                formatter={(value: number) => formatCurrency(value)}
+                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+
+        {/* Net Worth Area Chart */}
+        <div className="glass-card p-6 lg:col-span-2">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Net Worth Growth</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <AreaChart data={netWorthData}>
+              <defs>
+                <linearGradient id="colorNetWorth" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#10B981" stopOpacity={0.3}/>
+                  <stop offset="95%" stopColor="#10B981" stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+              <XAxis dataKey="month" stroke="#6b7280" style={{ fontSize: '12px' }} />
+              <YAxis stroke="#6b7280" style={{ fontSize: '12px' }} tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`} />
+              <Tooltip 
+                formatter={(value: number) => formatCurrency(value)}
+                contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.95)', borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)' }}
+              />
+              <Area type="monotone" dataKey="netWorth" stroke="#10B981" strokeWidth={3} fillOpacity={1} fill="url(#colorNetWorth)" />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
       </div>
 
       {/* Accounts Overview */}
