@@ -2,13 +2,15 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
+import { AuthService } from '../services/auth/AuthService';
 import { cn } from '../utils/helpers';
 
 export default function RegisterPage() {
   const navigate = useNavigate();
   const { login } = useAuthStore();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -36,7 +38,7 @@ export default function RegisterPage() {
     setError('');
 
     // Validation
-    if (!formData.name || !formData.email || !formData.password) {
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.password) {
       setError('Please fill in all fields');
       return;
     }
@@ -54,19 +56,28 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // Mock successful registration
-      login(
-        {
-          id: '1',
-          email: formData.email,
-          name: formData.name,
-        },
-        'mock-jwt-token'
+      const result = await AuthService.register(
+        formData.email,
+        formData.password,
+        formData.firstName,
+        formData.lastName
       );
-      navigate('/dashboard');
+
+      if (result.success && result.user) {
+        login(
+          {
+            id: result.user.id,
+            email: result.user.email,
+            name: `${result.user.firstName} ${result.user.lastName}`,
+          },
+          AuthService.getToken() || ''
+        );
+        navigate('/dashboard');
+      } else {
+        setError(result.error || 'Registration failed. Please try again.');
+      }
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -95,23 +106,44 @@ export default function RegisterPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Name */}
+            {/* First Name */}
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
-                Full Name
+              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                First Name
               </label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                 <input
-                  id="name"
-                  name="name"
+                  id="firstName"
+                  name="firstName"
                   type="text"
-                  value={formData.name}
+                  value={formData.firstName}
                   onChange={handleChange}
                   className="glass-input pl-11"
-                  placeholder="John Doe"
+                  placeholder="John"
                   required
-                  autoComplete="name"
+                  autoComplete="given-name"
+                />
+              </div>
+            </div>
+
+            {/* Last Name */}
+            <div>
+              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                Last Name
+              </label>
+              <div className="relative">
+                <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  className="glass-input pl-11"
+                  placeholder="Doe"
+                  required
+                  autoComplete="family-name"
                 />
               </div>
             </div>

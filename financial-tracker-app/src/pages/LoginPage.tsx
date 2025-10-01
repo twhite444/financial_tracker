@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
+import { AuthService } from '../services/auth/AuthService';
 import { cn } from '../utils/helpers';
 
 export default function LoginPage() {
@@ -19,24 +20,23 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      // TODO: Replace with actual API call
-      // For now, simulate login
-      if (email && password) {
-        // Mock successful login
+      const result = await AuthService.login(email, password);
+
+      if (result.success && result.user) {
         login(
           {
-            id: '1',
-            email: email,
-            name: 'Test User',
+            id: result.user.id,
+            email: result.user.email,
+            name: `${result.user.firstName} ${result.user.lastName}`,
           },
-          'mock-jwt-token'
+          AuthService.getToken() || ''
         );
         navigate('/dashboard');
       } else {
-        setError('Please enter your email and password');
+        setError(result.error || 'Login failed. Please try again.');
       }
     } catch (err) {
-      setError('Invalid credentials. Please try again.');
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setIsLoading(false);
     }
