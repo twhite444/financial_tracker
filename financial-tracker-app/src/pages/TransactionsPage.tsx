@@ -319,6 +319,175 @@ export default function TransactionsPage() {
           </div>
         </div>
       )}
+
+      {/* Add Transaction Modal */}
+      <Modal
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setFormData({
+            description: '',
+            amount: '',
+            date: new Date().toISOString().split('T')[0],
+            category: 'Groceries',
+            account: 'Schwab Checking',
+            type: 'expense',
+          });
+        }}
+        title="Add Transaction"
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            // TODO: Integrate with TransactionService
+            console.log('Adding transaction:', formData);
+            setIsAddModalOpen(false);
+          }}
+          className="space-y-6"
+        >
+          {/* Transaction Type */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Type *
+            </label>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, type: 'expense' })}
+                className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
+                  formData.type === 'expense'
+                    ? 'border-red-500 bg-red-50 text-red-700'
+                    : 'border-gray-200 bg-white/50'
+                }`}
+              >
+                <ArrowUpRight className="h-5 w-5 mx-auto mb-1" />
+                <span className="text-sm font-medium">Expense</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, type: 'income' })}
+                className={`flex-1 py-3 px-4 rounded-xl border-2 transition-all ${
+                  formData.type === 'income'
+                    ? 'border-green-500 bg-green-50 text-green-700'
+                    : 'border-gray-200 bg-white/50'
+                }`}
+              >
+                <ArrowDownLeft className="h-5 w-5 mx-auto mb-1" />
+                <span className="text-sm font-medium">Income</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Description */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Description *
+            </label>
+            <input
+              type="text"
+              required
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              placeholder="e.g., Grocery Store"
+              className="glass-input"
+            />
+          </div>
+
+          {/* Amount */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Amount *
+            </label>
+            <div className="relative">
+              <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500">
+                $
+              </span>
+              <input
+                type="number"
+                required
+                step="0.01"
+                min="0"
+                value={formData.amount}
+                onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                placeholder="0.00"
+                className="glass-input pl-8"
+              />
+            </div>
+          </div>
+
+          {/* Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Date *
+            </label>
+            <input
+              type="date"
+              required
+              value={formData.date}
+              onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+              className="glass-input"
+            />
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category *
+            </label>
+            <select
+              value={formData.category}
+              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              className="glass-input"
+            >
+              {formData.type === 'income' ? (
+                <option value="Income">Income</option>
+              ) : (
+                <>
+                  <option value="Groceries">Groceries</option>
+                  <option value="Dining">Dining</option>
+                  <option value="Shopping">Shopping</option>
+                  <option value="Transportation">Transportation</option>
+                  <option value="Entertainment">Entertainment</option>
+                  <option value="Health">Health</option>
+                  <option value="Utilities">Utilities</option>
+                </>
+              )}
+            </select>
+          </div>
+
+          {/* Account */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Account *
+            </label>
+            <select
+              value={formData.account}
+              onChange={(e) => setFormData({ ...formData, account: e.target.value })}
+              className="glass-input"
+            >
+              <option value="Schwab Checking">Schwab Checking</option>
+              <option value="Schwab Retirement">Schwab Retirement</option>
+              <option value="Capital One Quicksilver">Capital One Quicksilver</option>
+              <option value="Discover it Cash Back">Discover it Cash Back</option>
+              <option value="Chase Sapphire">Chase Sapphire</option>
+            </select>
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(false)}
+              className="btn-secondary flex-1"
+            >
+              Cancel
+            </button>
+            <button type="submit" className="btn-primary flex-1">
+              Add Transaction
+            </button>
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }
