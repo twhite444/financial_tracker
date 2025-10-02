@@ -12,6 +12,7 @@ import { useState } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { cn } from '../../utils/helpers';
 import ThemeToggle from '../common/ThemeToggle';
+import MobileBottomNav from './MobileBottomNav';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -144,9 +145,12 @@ export default function Layout() {
       </header>
 
       {/* Main Content */}
-      <main className="lg:ml-72 pt-24 lg:pt-4 px-4 pb-8">
+      <main className="lg:ml-72 pt-24 lg:pt-4 px-4 pb-24 md:pb-8">
         <Outlet />
       </main>
+
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav />
     </div>
   );
 }
