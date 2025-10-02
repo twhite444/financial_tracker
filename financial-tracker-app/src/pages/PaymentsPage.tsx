@@ -1,93 +1,65 @@
-import { Plus, Calendar, Check, Clock, AlertCircle, Repeat } from 'lucide-react';
+import { Plus, Calendar, Check, Clock, AlertCircle, Repeat, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, isToday, isBefore, startOfDay } from 'date-fns';
 import Modal from '../components/common/Modal';
-
-const mockPayments = [
-  {
-    id: '1',
-    name: 'Capital One Quicksilver',
-    amount: 150,
-    dueDate: new Date(2024, 0, 15), // Jan 15
-    recurring: true,
-    frequency: 'monthly',
-    status: 'pending',
-    category: 'credit_card',
-  },
-  {
-    id: '2',
-    name: 'Discover it Cash Back',
-    amount: 200,
-    dueDate: new Date(2024, 0, 22), // Jan 22
-    recurring: true,
-    frequency: 'monthly',
-    status: 'pending',
-    category: 'credit_card',
-  },
-  {
-    id: '3',
-    name: 'Chase Sapphire Preferred',
-    amount: 100,
-    dueDate: new Date(2024, 0, 28), // Jan 28
-    recurring: true,
-    frequency: 'monthly',
-    status: 'pending',
-    category: 'credit_card',
-  },
-  {
-    id: '4',
-    name: 'Internet Bill',
-    amount: 80,
-    dueDate: new Date(2024, 0, 5), // Jan 5
-    recurring: true,
-    frequency: 'monthly',
-    status: 'paid',
-    category: 'utilities',
-  },
-  {
-    id: '5',
-    name: 'Phone Bill',
-    amount: 65,
-    dueDate: new Date(2024, 0, 10), // Jan 10
-    recurring: true,
-    frequency: 'monthly',
-    status: 'paid',
-    category: 'utilities',
-  },
-];
-
-const categoryColors = {
-  credit_card: 'bg-orange-100 text-orange-700 border-orange-200',
-  utilities: 'bg-blue-100 text-blue-700 border-blue-200',
-  subscription: 'bg-purple-100 text-purple-700 border-purple-200',
-  insurance: 'bg-green-100 text-green-700 border-green-200',
-};
+import { PaymentService } from '../services/data/PaymentService';
+import { AccountService } from '../services/data/AccountService';
+import { PaymentReminder } from '../models/PaymentReminder';
+import { Account } from '../models/Account';
 
 export default function PaymentsPage() {
+  const [payments, setPayments] = useState<PaymentReminder[]>([]);
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
   const [currentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formData, setFormData] = useState({
-    name: '',
+    title: '',
     amount: '',
     dueDate: '',
     recurring: false,
-    frequency: 'monthly',
-    category: 'credit_card',
+    frequency: 'monthly' as PaymentReminder['frequency'],
+    accountId: '',
   });
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    const [paymentResult, accResult] = await Promise.all([
+      PaymentService.getPaymentReminders(),
+      AccountService.getAccounts()
+    ]);
+
+    if (paymentResult.success && paymentResult.data) {
+      setPayments(paymentResult.data);
+    } else {
+      setError(paymentResult.error || 'Failed to load payments');
+    }
+
+    if (accResult.success && accResult.data) {
+      setAccounts(accResult.data);
+    }
+
+    setIsLoading(false);
+  };
 
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const daysInMonth = eachDayOfInterval({ start: monthStart, end: monthEnd });
 
   const getPaymentsForDate = (date: Date) => {
-    return mockPayments.filter((payment) => isSameDay(payment.dueDate, date));
+    return payments.filter((payment) => isSameDay(new Date(payment.dueDate), date));
   };
 
-  const upcomingPayments = mockPayments
-    .filter((p) => p.status === 'pending')
-    .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime());
+  const upcomingPayments = payments
+    .filter((p) => !p.isPaid)
+    .sort((a, b) => new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime());
 
   const totalDue = upcomingPayments.reduce((sum, p) => sum + p.amount, 0);
 
@@ -112,7 +84,21 @@ export default function PaymentsPage() {
         </button>
       </div>
 
-      {/* Summary Card */}
+      {/* Error Message */}
+      {error && (
+        <div className="glass-card p-4 bg-red-50 border-red-200">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
+        </div>
+      ) : (
+        <>
+          {/* Summary Card */}
       <div className="glass-card p-6">
         <div className="flex items-center justify-between">
           <div>
@@ -155,7 +141,6 @@ export default function PaymentsPage() {
               {daysInMonth.map((day) => {
                 const payments = getPaymentsForDate(day);
                 const hasPayments = payments.length > 0;
-                const hasPending = payments.some((p) => p.status === 'pending');
                 const isPast = isPastDue(day);
                 const today = isToday(day);
 
@@ -183,12 +168,12 @@ export default function PaymentsPage() {
                         <div className="mt-1 flex flex-col gap-1">
                           {payments.slice(0, 2).map((payment) => (
                             <div
-                              key={payment.id}
+                              key={payment._id || payment.id}
                               className={`
                                 h-1 w-full rounded-full
-                                ${payment.status === 'paid' ? 'bg-green-400' : ''}
-                                ${payment.status === 'pending' && isPast ? 'bg-red-500' : ''}
-                                ${payment.status === 'pending' && !isPast ? 'bg-orange-400' : ''}
+                                ${payment.isPaid ? 'bg-green-400' : ''}
+                                ${!payment.isPaid && isPast ? 'bg-red-500' : ''}
+                                ${!payment.isPaid && !isPast ? 'bg-orange-400' : ''}
                               `}
                             />
                           ))}
@@ -226,20 +211,20 @@ export default function PaymentsPage() {
           <h3 className="text-lg font-semibold text-gray-900">Upcoming Payments</h3>
           <div className="space-y-3">
             {upcomingPayments.map((payment) => {
-              const isPast = isPastDue(payment.dueDate);
+              const isPast = isPastDue(new Date(payment.dueDate));
               return (
                 <div
-                  key={payment.id}
+                  key={payment._id || payment.id}
                   className={`glass-card-hover p-4 ${
                     isPast ? 'border-l-4 border-red-500' : ''
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{payment.name}</h4>
+                      <h4 className="font-medium text-gray-900">{payment.title}</h4>
                       <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
                         <Clock className="h-3 w-3" />
-                        {formatDate(payment.dueDate)}
+                        {formatDate(new Date(payment.dueDate))}
                         {isPast && (
                           <span className="text-red-600 font-medium ml-1">(Overdue)</span>
                         )}
@@ -254,7 +239,17 @@ export default function PaymentsPage() {
                     <p className="text-lg font-bold text-gray-900">
                       {formatCurrency(payment.amount)}
                     </p>
-                    <button className="glass-button text-sm flex items-center gap-1">
+                    <button 
+                      onClick={async () => {
+                        const result = await PaymentService.markPaymentAsPaid(payment._id || payment.id!);
+                        if (result.success) {
+                          await loadData();
+                        } else {
+                          setError(result.error || 'Failed to mark payment as paid');
+                        }
+                      }}
+                      className="glass-button text-sm flex items-center gap-1"
+                    >
                       <Check className="h-4 w-4" />
                       Mark Paid
                     </button>
@@ -279,35 +274,57 @@ export default function PaymentsPage() {
         onClose={() => {
           setIsAddModalOpen(false);
           setFormData({
-            name: '',
+            title: '',
             amount: '',
             dueDate: '',
             recurring: false,
             frequency: 'monthly',
-            category: 'credit_card',
+            accountId: accounts[0]?._id || accounts[0]?.id || '',
           });
         }}
         title="Add Payment Reminder"
       >
         <form
-          onSubmit={(e) => {
+          onSubmit={async (e) => {
             e.preventDefault();
-            // TODO: Integrate with PaymentService
-            console.log('Adding payment reminder:', formData);
-            setIsAddModalOpen(false);
+            const paymentData: Omit<PaymentReminder, '_id' | 'id'> = {
+              title: formData.title,
+              amount: parseFloat(formData.amount),
+              dueDate: formData.dueDate,
+              recurring: formData.recurring,
+              frequency: formData.recurring ? formData.frequency : undefined,
+              accountId: formData.accountId,
+              isPaid: false,
+            };
+
+            const result = await PaymentService.createPaymentReminder(paymentData);
+            if (result.success) {
+              await loadData();
+              setIsAddModalOpen(false);
+              setFormData({
+                title: '',
+                amount: '',
+                dueDate: '',
+                recurring: false,
+                frequency: 'monthly',
+                accountId: accounts[0]?._id || accounts[0]?.id || '',
+              });
+            } else {
+              setError(result.error || 'Failed to create payment reminder');
+            }
           }}
           className="space-y-6"
         >
-          {/* Payment Name */}
+          {/* Payment Title */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Payment Name *
+              Payment Title *
             </label>
             <input
               type="text"
               required
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="e.g., Capital One Credit Card"
               className="glass-input"
             />
@@ -349,20 +366,23 @@ export default function PaymentsPage() {
             />
           </div>
 
-          {/* Category */}
+          {/* Account */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Category *
+              Account *
             </label>
             <select
-              value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              value={formData.accountId}
+              onChange={(e) => setFormData({ ...formData, accountId: e.target.value })}
               className="glass-input"
+              required
             >
-              <option value="credit_card">Credit Card</option>
-              <option value="utilities">Utilities</option>
-              <option value="subscription">Subscription</option>
-              <option value="insurance">Insurance</option>
+              <option value="">Select an account</option>
+              {accounts.map((account) => (
+                <option key={account._id || account.id} value={account._id || account.id}>
+                  {account.name}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -388,7 +408,7 @@ export default function PaymentsPage() {
               </label>
               <select
                 value={formData.frequency}
-                onChange={(e) => setFormData({ ...formData, frequency: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, frequency: e.target.value as PaymentReminder['frequency'] })}
                 className="glass-input"
               >
                 <option value="weekly">Weekly</option>
@@ -414,6 +434,8 @@ export default function PaymentsPage() {
           </div>
         </form>
       </Modal>
+        </>
+      )}
     </div>
   );
 }
