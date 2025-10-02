@@ -1,81 +1,127 @@
-import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRight, Loader2 } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 import { LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from 'react';
+import { AccountService } from '../services/data/AccountService';
+import { TransactionService } from '../services/data/TransactionService';
+import { PaymentService } from '../services/data/PaymentService';
+import { Account } from '../models/Account';
+import { Transaction } from '../models/Transaction';
+import { PaymentReminder } from '../models/PaymentReminder';
 
-const stats = [
-  {
-    label: 'Net Worth',
-    value: 87500,
-    change: 12.5,
-    trend: 'up',
-    icon: TrendingUp,
-    color: 'text-green-600',
-  },
-  {
-    label: 'Total Balance',
-    value: 65000,
-    change: 5.2,
-    trend: 'up',
-    icon: Wallet,
-    color: 'text-blue-600',
-  },
-  {
-    label: 'Total Debt',
-    value: 4500,
-    change: -8.1,
-    trend: 'down',
-    icon: CreditCard,
-    color: 'text-red-600',
-  },
-];
-
-const accounts = [
-  { name: 'Schwab Checking', balance: 12500, type: 'checking', institution: 'Schwab' },
-  { name: 'Schwab Retirement', balance: 52500, type: 'retirement', institution: 'Schwab' },
-  { name: 'Capital One Quicksilver', balance: -1500, type: 'credit', institution: 'Capital One' },
-  { name: 'Discover it Cash Back', balance: -2000, type: 'credit', institution: 'Discover' },
-  { name: 'Chase Sapphire', balance: -1000, type: 'credit', institution: 'Chase' },
-];
-
-const recentTransactions = [
-  { id: 1, description: 'Grocery Store', amount: -127.50, date: '2025-09-30', category: 'Groceries' },
-  { id: 2, description: 'Salary Deposit', amount: 5000, date: '2025-09-29', category: 'Income' },
-  { id: 3, description: 'Electric Bill', amount: -89.32, date: '2025-09-28', category: 'Utilities' },
-  { id: 4, description: 'Gas Station', amount: -45.00, date: '2025-09-27', category: 'Transportation' },
-  { id: 5, description: 'Restaurant', amount: -68.50, date: '2025-09-26', category: 'Dining' },
-];
-
-// Balance trend data (last 6 months)
-const balanceTrendData = [
-  { month: 'Apr', balance: 58000 },
-  { month: 'May', balance: 61500 },
-  { month: 'Jun', balance: 59800 },
-  { month: 'Jul', balance: 63200 },
-  { month: 'Aug', balance: 62000 },
-  { month: 'Sep', balance: 65000 },
-];
-
-// Spending by category data
-const spendingData = [
-  { name: 'Groceries', value: 450, color: '#3B82F6' },
-  { name: 'Dining', value: 320, color: '#F59E0B' },
-  { name: 'Transportation', value: 180, color: '#10B981' },
-  { name: 'Utilities', value: 250, color: '#6366F1' },
-  { name: 'Entertainment', value: 150, color: '#EC4899' },
-  { name: 'Shopping', value: 280, color: '#8B5CF6' },
-];
-
-// Net worth trend data
-const netWorthData = [
-  { month: 'Apr', netWorth: 75000 },
-  { month: 'May', netWorth: 78500 },
-  { month: 'Jun', netWorth: 80200 },
-  { month: 'Jul', netWorth: 83000 },
-  { month: 'Aug', netWorth: 85500 },
-  { month: 'Sep', netWorth: 87500 },
-];
+// Spending colors for category breakdown
+const spendingColors: Record<string, string> = {
+  Groceries: '#3B82F6',
+  Dining: '#F59E0B',
+  Transportation: '#10B981',
+  Utilities: '#6366F1',
+  Entertainment: '#EC4899',
+  Shopping: '#8B5CF6',
+  Income: '#10B981',
+  Health: '#14B8A6',
+};
 
 export default function DashboardPage() {
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [payments, setPayments] = useState<PaymentReminder[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const loadData = async () => {
+    setIsLoading(true);
+    const [accResult, txResult, paymentResult] = await Promise.all([
+      AccountService.getAccounts(),
+      TransactionService.getTransactions({ limit: 5 }),
+      PaymentService.getUpcomingPayments(30)
+    ]);
+
+    if (accResult.success && accResult.data) {
+      setAccounts(accResult.data);
+    } else {
+      setError(accResult.error || 'Failed to load accounts');
+    }
+
+    if (txResult.success && txResult.data) {
+      setTransactions(txResult.data.transactions);
+    }
+
+    if (paymentResult.success && paymentResult.data) {
+      setPayments(paymentResult.data);
+    }
+
+    setIsLoading(false);
+  };
+
+  // Calculate stats from real data
+  const totalBalance = accounts
+    .filter((acc) => acc.type !== 'credit_card')
+    .reduce((sum, acc) => sum + acc.balance, 0);
+
+  const totalDebt = accounts
+    .filter((acc) => acc.type === 'credit_card')
+    .reduce((sum, acc) => sum + acc.balance, 0);
+
+  const netWorth = totalBalance - totalDebt;
+
+  const stats = [
+    {
+      label: 'Net Worth',
+      value: netWorth,
+      change: 0, // We don't have historical data yet
+      trend: 'up',
+      icon: TrendingUp,
+      color: 'text-green-600',
+    },
+    {
+      label: 'Total Balance',
+      value: totalBalance,
+      change: 0,
+      trend: 'up',
+      icon: Wallet,
+      color: 'text-blue-600',
+    },
+    {
+      label: 'Total Debt',
+      value: totalDebt,
+      change: 0,
+      trend: 'down',
+      icon: CreditCard,
+      color: 'text-red-600',
+    },
+  ];
+
+  // Get recent transactions (already limited to 5)
+  const recentTransactions = transactions.slice(0, 5);
+
+  // Calculate spending by category
+  const spendingByCategory = transactions
+    .filter((tx) => tx.type === 'expense')
+    .reduce((acc, tx) => {
+      const category = tx.category || 'Other';
+      acc[category] = (acc[category] || 0) + tx.amount;
+      return acc;
+    }, {} as Record<string, number>);
+
+  const spendingData = Object.entries(spendingByCategory).map(([name, value]) => ({
+    name,
+    value: Math.abs(value),
+    color: spendingColors[name] || '#6B7280',
+  }));
+
+  // Placeholder data for charts (would need historical data from backend)
+  const balanceTrendData = [
+    { month: 'Current', balance: totalBalance },
+  ];
+
+  const netWorthData = [
+    { month: 'Current', netWorth: netWorth },
+  ];
+  
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
@@ -84,7 +130,21 @@ export default function DashboardPage() {
         <p className="text-gray-600 mt-1">Welcome back! Here's your financial overview.</p>
       </div>
 
-      {/* Stats Grid */}
+      {/* Error Message */}
+      {error && (
+        <div className="glass-card p-4 bg-red-50 border-red-200">
+          <p className="text-red-600">{error}</p>
+        </div>
+      )}
+
+      {/* Loading State */}
+      {isLoading ? (
+        <div className="flex justify-center items-center py-12">
+          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
+        </div>
+      ) : (
+        <>
+          {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {stats.map((stat) => (
           <div key={stat.label} className="glass-card-hover p-6">
@@ -197,8 +257,10 @@ export default function DashboardPage() {
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`inline-block w-2 h-2 rounded-full ${
                       account.type === 'checking' ? 'bg-blue-500' :
-                      account.type === 'retirement' ? 'bg-purple-500' :
-                      'bg-orange-500'
+                      account.type === 'savings' ? 'bg-green-500' :
+                      account.type === 'investment' ? 'bg-purple-500' :
+                      account.type === 'credit_card' ? 'bg-orange-500' :
+                      'bg-gray-500'
                     }`} />
                     <p className="font-medium text-gray-900">{account.name}</p>
                   </div>
@@ -233,7 +295,9 @@ export default function DashboardPage() {
               <div className="flex items-center justify-between">
                 <div className="flex-1">
                   <p className="font-medium text-gray-900">{transaction.description}</p>
-                  <p className="text-sm text-gray-500 mt-0.5">{transaction.date}</p>
+                  <p className="text-sm text-gray-500 mt-0.5">
+                    {new Date(transaction.date).toLocaleDateString()}
+                  </p>
                 </div>
                 <div className="text-right">
                   <p className={`font-semibold ${
@@ -250,6 +314,8 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 }
