@@ -21,6 +21,7 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
     if (!token) {
+      console.log('❌ No token provided');
       res.status(401).json({ error: 'Access token required' });
       return;
     }
@@ -32,13 +33,16 @@ export const authenticateToken = (req: AuthRequest, res: Response, next: NextFun
     next();
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
+      console.log('❌ Token expired');
       res.status(401).json({ error: 'Token expired' });
       return;
     }
     if (error instanceof jwt.JsonWebTokenError) {
+      console.log('❌ Invalid token:', error.message);
       res.status(403).json({ error: 'Invalid token' });
       return;
     }
+    console.log('❌ Auth error:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 };

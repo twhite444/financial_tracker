@@ -217,9 +217,10 @@ export default function AccountsPage() {
         {filteredAccounts.map((account) => {
           const config = accountTypeConfig[account.type as keyof typeof accountTypeConfig];
           const Icon = config.icon;
+          const accountKey = account._id || account.id || `account-${account.accountNumber}`;
 
           return (
-            <div key={account.id} className="glass-card-hover p-6">
+            <div key={accountKey} className="glass-card-hover p-6">
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-start gap-3">
                   <div className={`p-3 rounded-xl ${config.color}`}>

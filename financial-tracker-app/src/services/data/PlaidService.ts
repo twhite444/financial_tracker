@@ -1,3 +1,5 @@
+import { AuthService } from '../auth/AuthService';
+
 const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api/plaid`;
 
 export class PlaidService {
@@ -7,10 +9,7 @@ export class PlaidService {
   static async createLinkToken(): Promise<string> {
     const response = await fetch(`${API_URL}/create-link-token`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
+      headers: AuthService.getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -27,10 +26,7 @@ export class PlaidService {
   static async exchangePublicToken(publicToken: string): Promise<void> {
     const response = await fetch(`${API_URL}/exchange-token`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
+      headers: AuthService.getAuthHeaders(),
       body: JSON.stringify({ public_token: publicToken }),
     });
 
@@ -45,10 +41,7 @@ export class PlaidService {
   static async syncAccounts(): Promise<any[]> {
     const response = await fetch(`${API_URL}/sync-accounts`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
+      headers: AuthService.getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -65,10 +58,7 @@ export class PlaidService {
   static async syncTransactions(): Promise<any[]> {
     const response = await fetch(`${API_URL}/sync-transactions`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
+      headers: AuthService.getAuthHeaders(),
     });
 
     if (!response.ok) {
@@ -85,10 +75,7 @@ export class PlaidService {
   static async getLinkStatus(): Promise<{ isLinked: boolean; itemId?: string }> {
     const response = await fetch(`${API_URL}/status`, {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`,
-      },
+      headers: AuthService.getAuthHeaders(),
     });
 
     if (!response.ok) {
