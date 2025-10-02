@@ -1,4 +1,4 @@
-import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank, Loader2, LinkIcon } from 'lucide-react';
+import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank, LinkIcon } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
@@ -7,6 +7,7 @@ import { AccountService } from '../services/data/AccountService';
 import { Account } from '../models/Account';
 import { PlaidService } from '../services/data/PlaidService';
 import { usePlaidLink } from 'react-plaid-link';
+import { CardSkeleton } from '../components/common/Skeletons';
 
 const accountTypeConfig = {
   checking: { icon: Building2, color: 'bg-blue-100 text-blue-600', label: 'Checking' },
@@ -159,8 +160,10 @@ export default function AccountsPage() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
         </div>
       ) : accounts.length === 0 ? (
         <div className="glass-card p-12 text-center">

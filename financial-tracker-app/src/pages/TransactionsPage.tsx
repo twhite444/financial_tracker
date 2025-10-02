@@ -1,4 +1,4 @@
-import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -7,6 +7,7 @@ import { TransactionService } from '../services/data/TransactionService';
 import { AccountService } from '../services/data/AccountService';
 import { Transaction } from '../models/Transaction';
 import { Account } from '../models/Account';
+import { TableRowSkeleton } from '../components/common/Skeletons';
 
 const categories = ['All', 'Income', 'Groceries', 'Dining', 'Shopping', 'Transportation', 'Entertainment', 'Health', 'Utilities'];
 
@@ -197,8 +198,10 @@ export default function TransactionsPage() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
+        <div className="space-y-3">
+          {[...Array(6)].map((_, i) => (
+            <TableRowSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <>

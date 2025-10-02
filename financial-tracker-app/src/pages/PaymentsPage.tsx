@@ -1,4 +1,4 @@
-import { Plus, Calendar, Check, Clock, AlertCircle, Repeat, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Calendar, Check, Clock, AlertCircle, Repeat, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -8,6 +8,7 @@ import { PaymentService } from '../services/data/PaymentService';
 import { AccountService } from '../services/data/AccountService';
 import { PaymentReminder } from '../models/PaymentReminder';
 import { Account } from '../models/Account';
+import { CardSkeleton } from '../components/common/Skeletons';
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<PaymentReminder[]>([]);
@@ -94,8 +95,10 @@ export default function PaymentsPage() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {[...Array(4)].map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
         </div>
       ) : (
         <>

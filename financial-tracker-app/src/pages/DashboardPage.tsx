@@ -1,4 +1,4 @@
-import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRight, Loader2 } from 'lucide-react';
+import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 import { LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
@@ -8,6 +8,7 @@ import { PaymentService } from '../services/data/PaymentService';
 import { Account } from '../models/Account';
 import { Transaction } from '../models/Transaction';
 import { PaymentReminder } from '../models/PaymentReminder';
+import { DashboardSkeleton } from '../components/common/Skeletons';
 
 // Spending colors for category breakdown
 const spendingColors: Record<string, string> = {
@@ -139,9 +140,7 @@ export default function DashboardPage() {
 
       {/* Loading State */}
       {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-accent-blue" />
-        </div>
+        <DashboardSkeleton />
       ) : (
         <>
           {/* Stats Grid */}
