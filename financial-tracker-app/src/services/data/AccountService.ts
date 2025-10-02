@@ -1,7 +1,7 @@
 import { AuthService } from '../auth/AuthService';
 import { Account } from '../../models/Account';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api`;
 
 export class AccountService {
     static async getAccounts(): Promise<{ success: boolean; data?: Account[]; error?: string }> {

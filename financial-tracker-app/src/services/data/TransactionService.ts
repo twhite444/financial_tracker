@@ -1,7 +1,7 @@
 import { AuthService } from '../auth/AuthService';
 import { Transaction } from '../../models/Transaction';
 
-const API_URL = 'http://localhost:5001/api';
+const API_URL = `${import.meta.env.VITE_API_URL || 'http://localhost:5001'}/api`;
 
 export class TransactionService {
     static async getTransactions(filters?: {
