@@ -5,18 +5,24 @@ import { User } from '../models/User';
 import { Account } from '../models/Account';
 import { Transaction } from '../models/Transaction';
 
-// Initialize Plaid client
+// Initialize Plaid client with proper authentication
 const configuration = new Configuration({
-  basePath: PlaidEnvironments.sandbox, // Use sandbox for now
+  basePath: PlaidEnvironments.sandbox,
   baseOptions: {
     headers: {
-      'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID || '',
-      'PLAID-SECRET': process.env.PLAID_SECRET || '',
+      'PLAID-CLIENT-ID': process.env.PLAID_CLIENT_ID,
+      'PLAID-SECRET': process.env.PLAID_SECRET,
     },
   },
 });
 
 const plaidClient = new PlaidApi(configuration);
+
+console.log('🔐 Plaid initialized with:', {
+  clientId: process.env.PLAID_CLIENT_ID,
+  secretPresent: !!process.env.PLAID_SECRET,
+  environment: 'sandbox'
+});
 
 /**
  * Create a link token for Plaid Link initialization
@@ -36,6 +42,11 @@ export const createLinkToken = async (req: AuthRequest, res: Response): Promise<
       return;
     }
 
+    // Log credentials for debugging (remove in production)
+    console.log('🔑 Plaid Client ID:', process.env.PLAID_CLIENT_ID);
+    console.log('🔑 Plaid Secret exists:', !!process.env.PLAID_SECRET);
+    console.log('🔑 Plaid Secret length:', process.env.PLAID_SECRET?.length);
+
     const request = {
       user: {
         client_user_id: userId,
@@ -48,9 +59,13 @@ export const createLinkToken = async (req: AuthRequest, res: Response): Promise<
 
     const response = await plaidClient.linkTokenCreate(request);
     res.json({ link_token: response.data.link_token });
-  } catch (error) {
-    console.error('Error creating link token:', error);
-    res.status(500).json({ error: 'Failed to create link token' });
+  } catch (error: any) {
+    console.error('❌ Error creating link token:', error);
+    console.error('❌ Error response:', error.response?.data);
+    res.status(500).json({ 
+      error: 'Failed to create link token',
+      details: error.response?.data || error.message 
+    });
   }
 };
 

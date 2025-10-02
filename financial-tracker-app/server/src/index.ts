@@ -26,7 +26,9 @@ connectDatabase();
 app.use(helmet()); // Security headers
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: process.env.NODE_ENV === 'development' 
+      ? /^http:\/\/localhost:\d+$/  // Allow all localhost ports in development
+      : process.env.CORS_ORIGIN || 'http://localhost:5173',
     credentials: true,
   })
 ); // CORS
@@ -88,7 +90,7 @@ app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
 app.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔒 CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
+  console.log(`🔒 CORS enabled for: ${process.env.NODE_ENV === 'development' ? 'all localhost ports' : process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
 });
 
 // Graceful shutdown

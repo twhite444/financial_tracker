@@ -72,7 +72,7 @@ mongodb+srv://username:password@cluster0.xxxxx.mongodb.net/financial_tracker?ret
 ## 🎨 Phase 3: Frontend Deployment (Vercel)
 
 - [ ] Create Vercel account at https://vercel.com/signup
-- [ ] Sign up with GitHub
+- [ ] Sign up with GitHubz
 - [ ] Authorize Vercel to access repositories
 - [ ] Click "Add New..." → "Project"
 - [ ] Import repository: `twhite444/financial_tracker`
