@@ -1,6 +1,7 @@
 import { Plus, Calendar, Check, Clock, AlertCircle, Repeat, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import { startOfMonth, endOfMonth, eachDayOfInterval, format, isSameDay, isToday, isBefore, startOfDay } from 'date-fns';
 import Modal from '../components/common/Modal';
 import { PaymentService } from '../services/data/PaymentService';
@@ -243,9 +244,12 @@ export default function PaymentsPage() {
                       onClick={async () => {
                         const result = await PaymentService.markPaymentAsPaid(payment._id || payment.id!);
                         if (result.success) {
+                          toast.success('Payment marked as paid!');
                           await loadData();
                         } else {
-                          setError(result.error || 'Failed to mark payment as paid');
+                          const errorMsg = result.error || 'Failed to mark payment as paid';
+                          setError(errorMsg);
+                          toast.error(errorMsg);
                         }
                       }}
                       className="glass-button text-sm flex items-center gap-1"
@@ -299,6 +303,7 @@ export default function PaymentsPage() {
 
             const result = await PaymentService.createPaymentReminder(paymentData);
             if (result.success) {
+              toast.success('Payment reminder created successfully!');
               await loadData();
               setIsAddModalOpen(false);
               setFormData({
@@ -310,7 +315,9 @@ export default function PaymentsPage() {
                 accountId: accounts[0]?._id || accounts[0]?.id || '',
               });
             } else {
-              setError(result.error || 'Failed to create payment reminder');
+              const errorMsg = result.error || 'Failed to create payment reminder';
+              setError(errorMsg);
+              toast.error(errorMsg);
             }
           }}
           className="space-y-6"

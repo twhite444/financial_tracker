@@ -1,6 +1,7 @@
 import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2, Loader2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import Modal from '../components/common/Modal';
 import { TransactionService } from '../services/data/TransactionService';
 import { AccountService } from '../services/data/AccountService';
@@ -313,6 +314,7 @@ export default function TransactionsPage() {
 
             const result = await TransactionService.createTransaction(transactionData);
             if (result.success) {
+              toast.success('Transaction created successfully!');
               await loadData();
               setIsAddModalOpen(false);
               setFormData({
@@ -324,7 +326,9 @@ export default function TransactionsPage() {
                 type: 'expense',
               });
             } else {
-              setError(result.error || 'Failed to create transaction');
+              const errorMsg = result.error || 'Failed to create transaction';
+              setError(errorMsg);
+              toast.error(errorMsg);
             }
           }}
           className="space-y-6"

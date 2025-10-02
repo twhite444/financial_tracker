@@ -1,6 +1,7 @@
 import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank, Loader2 } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
 import { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import Modal from '../components/common/Modal';
 import { AccountService } from '../services/data/AccountService';
 import { Account } from '../models/Account';
@@ -162,9 +163,12 @@ export default function AccountsPage() {
                       if (window.confirm('Are you sure you want to delete this account?')) {
                         const result = await AccountService.deleteAccount(account._id || account.id!);
                         if (result.success) {
+                          toast.success('Account deleted successfully');
                           await loadAccounts();
                         } else {
-                          setError(result.error || 'Failed to delete account');
+                          const errorMsg = result.error || 'Failed to delete account';
+                          setError(errorMsg);
+                          toast.error(errorMsg);
                         }
                       }
                     }}
@@ -255,6 +259,7 @@ export default function AccountsPage() {
 
             const result = await AccountService.createAccount(accountData);
             if (result.success) {
+              toast.success('Account created successfully!');
               await loadAccounts();
               setIsAddModalOpen(false);
               setFormData({
@@ -266,7 +271,9 @@ export default function AccountsPage() {
                 accountNumber: '',
               });
             } else {
-              setError(result.error || 'Failed to create account');
+              const errorMsg = result.error || 'Failed to create account';
+              setError(errorMsg);
+              toast.error(errorMsg);
             }
           }}
           className="space-y-6"

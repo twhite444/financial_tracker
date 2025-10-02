@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuthStore } from '../stores/authStore';
 import { AuthService } from '../services/auth/AuthService';
@@ -31,12 +32,17 @@ export default function LoginPage() {
           },
           AuthService.getToken() || ''
         );
+        toast.success('Welcome back!');
         navigate('/dashboard');
       } else {
-        setError(result.error || 'Login failed. Please try again.');
+        const errorMsg = result.error || 'Login failed. Please try again.';
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
-      setError('An unexpected error occurred. Please try again.');
+      const errorMsg = 'An unexpected error occurred. Please try again.';
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setIsLoading(false);
     }
