@@ -1,4 +1,4 @@
-import { Plus, Calendar, Check, Clock, AlertCircle, Repeat, Loader2 } from 'lucide-react';
+import { Plus, Calendar, Check, Clock, AlertCircle, Repeat, Loader2, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -240,23 +240,44 @@ export default function PaymentsPage() {
                     <p className="text-lg font-bold text-gray-900">
                       {formatCurrency(payment.amount)}
                     </p>
-                    <button 
-                      onClick={async () => {
-                        const result = await PaymentService.markPaymentAsPaid(payment._id || payment.id!);
-                        if (result.success) {
-                          toast.success('Payment marked as paid!');
-                          await loadData();
-                        } else {
-                          const errorMsg = result.error || 'Failed to mark payment as paid';
-                          setError(errorMsg);
-                          toast.error(errorMsg);
-                        }
-                      }}
-                      className="glass-button text-sm flex items-center gap-1"
-                    >
-                      <Check className="h-4 w-4" />
-                      Mark Paid
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button 
+                        onClick={async () => {
+                          const result = await PaymentService.markPaymentAsPaid(payment._id || payment.id!);
+                          if (result.success) {
+                            toast.success('Payment marked as paid!');
+                            await loadData();
+                          } else {
+                            const errorMsg = result.error || 'Failed to mark payment as paid';
+                            setError(errorMsg);
+                            toast.error(errorMsg);
+                          }
+                        }}
+                        className="glass-button text-sm flex items-center gap-1"
+                      >
+                        <Check className="h-4 w-4" />
+                        Mark Paid
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (window.confirm('Are you sure you want to delete this payment reminder?')) {
+                            const result = await PaymentService.deletePaymentReminder(payment._id || payment.id!);
+                            if (result.success) {
+                              toast.success('Payment reminder deleted successfully!');
+                              await loadData();
+                            } else {
+                              const errorMsg = result.error || 'Failed to delete payment reminder';
+                              setError(errorMsg);
+                              toast.error(errorMsg);
+                            }
+                          }
+                        }}
+                        className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete payment reminder"
+                      >
+                        <Trash2 className="h-4 w-4 text-red-600" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

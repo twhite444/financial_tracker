@@ -1,4 +1,4 @@
-import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2, Loader2 } from 'lucide-react';
+import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2, Loader2, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -255,16 +255,37 @@ export default function TransactionsPage() {
                     </div>
                   </div>
 
-                  {/* Right side - Amount */}
-                  <div className="text-right">
-                    <p
-                      className={`text-2xl font-bold ${
-                        transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
-                      }`}
+                  {/* Right side - Amount + Delete */}
+                  <div className="flex items-center gap-4">
+                    <div className="text-right">
+                      <p
+                        className={`text-2xl font-bold ${
+                          transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                        }`}
+                      >
+                        {transaction.type === 'income' ? '+' : '-'}
+                        {formatCurrency(Math.abs(transaction.amount))}
+                      </p>
+                    </div>
+                    <button
+                      onClick={async () => {
+                        if (window.confirm('Are you sure you want to delete this transaction? The account balance will be automatically adjusted.')) {
+                          const result = await TransactionService.deleteTransaction(transaction._id || transaction.id!);
+                          if (result.success) {
+                            toast.success('Transaction deleted successfully!');
+                            await loadData();
+                          } else {
+                            const errorMsg = result.error || 'Failed to delete transaction';
+                            setError(errorMsg);
+                            toast.error(errorMsg);
+                          }
+                        }
+                      }}
+                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
+                      title="Delete transaction"
                     >
-                      {transaction.type === 'income' ? '+' : '-'}
-                      {formatCurrency(Math.abs(transaction.amount))}
-                    </p>
+                      <Trash2 className="h-5 w-5 text-red-600" />
+                    </button>
                   </div>
                 </div>
               </div>
