@@ -8,6 +8,7 @@ import { AccountService } from '../services/data/AccountService';
 import { Transaction } from '../models/Transaction';
 import { Account } from '../models/Account';
 import { TableRowSkeleton } from '../components/common/Skeletons';
+import { useSearchParams } from 'react-router-dom';
 
 const categories = ['All', 'Income', 'Groceries', 'Dining', 'Shopping', 'Transportation', 'Entertainment', 'Health', 'Utilities'];
 
@@ -23,6 +24,7 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function TransactionsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +45,15 @@ export default function TransactionsPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Handle quick action query params
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'add') {
+      setIsAddModalOpen(true);
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   const loadData = async () => {
     setIsLoading(true);

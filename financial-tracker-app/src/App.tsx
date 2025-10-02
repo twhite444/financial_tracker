@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 import AccountsPage from './pages/AccountsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import TransactionsPage from './pages/TransactionsPage';
+import QuickActions from './components/common/QuickActions';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
@@ -65,6 +66,9 @@ function App() {
       {/* Catch all */}
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
+
+    {/* Quick Actions FAB - Only show when authenticated */}
+    {isAuthenticated && <QuickActions />}
     </ThemeProvider>
   );
 }

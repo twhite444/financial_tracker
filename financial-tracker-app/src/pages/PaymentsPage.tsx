@@ -9,8 +9,10 @@ import { AccountService } from '../services/data/AccountService';
 import { PaymentReminder } from '../models/PaymentReminder';
 import { Account } from '../models/Account';
 import { CardSkeleton } from '../components/common/Skeletons';
+import { useSearchParams } from 'react-router-dom';
 
 export default function PaymentsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [payments, setPayments] = useState<PaymentReminder[]>([]);
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -30,6 +32,15 @@ export default function PaymentsPage() {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Handle quick action query params
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'add') {
+      setIsAddModalOpen(true);
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   const loadData = async () => {
     setIsLoading(true);

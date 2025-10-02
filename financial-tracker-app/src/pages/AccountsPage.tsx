@@ -8,6 +8,7 @@ import { Account } from '../models/Account';
 import { PlaidService } from '../services/data/PlaidService';
 import { usePlaidLink } from 'react-plaid-link';
 import { CardSkeleton } from '../components/common/Skeletons';
+import { useSearchParams } from 'react-router-dom';
 
 const accountTypeConfig = {
   checking: { icon: Building2, color: 'bg-blue-100 text-blue-600', label: 'Checking' },
@@ -17,6 +18,7 @@ const accountTypeConfig = {
 };
 
 export default function AccountsPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -36,6 +38,18 @@ export default function AccountsPage() {
   useEffect(() => {
     loadAccounts();
   }, []);
+
+  // Handle quick action query params
+  useEffect(() => {
+    const action = searchParams.get('action');
+    if (action === 'add') {
+      setIsAddModalOpen(true);
+      setSearchParams({});
+    } else if (action === 'link') {
+      handleLinkBankAccount();
+      setSearchParams({});
+    }
+  }, [searchParams, setSearchParams]);
 
   // Plaid Link success handler
   const onPlaidSuccess = useCallback(async (public_token: string) => {
