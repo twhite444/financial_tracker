@@ -6,6 +6,8 @@ export interface IUser extends Document {
   password: string;
   firstName: string;
   lastName: string;
+  plaidAccessToken?: string;
+  plaidItemId?: string;
   createdAt: Date;
   updatedAt: Date;
   comparePassword(candidatePassword: string): Promise<boolean>;
@@ -36,6 +38,13 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: [true, 'Last name is required'],
       trim: true,
+    },
+    plaidAccessToken: {
+      type: String,
+      select: false, // Don't return in queries by default for security
+    },
+    plaidItemId: {
+      type: String,
     },
   },
   {

@@ -1,10 +1,12 @@
-import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Building2, CreditCard, PiggyBank, Loader2, LinkIcon } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import toast from 'react-hot-toast';
 import Modal from '../components/common/Modal';
 import { AccountService } from '../services/data/AccountService';
 import { Account } from '../models/Account';
+import { PlaidService } from '../services/data/PlaidService';
+import { usePlaidLink } from 'react-plaid-link';
 
 const accountTypeConfig = {
   checking: { icon: Building2, color: 'bg-blue-100 text-blue-600', label: 'Checking' },
@@ -27,10 +29,75 @@ export default function AccountsPage() {
     creditLimit: '',
     accountNumber: '',
   });
+  const [linkToken, setLinkToken] = useState<string | null>(null);
+  const [isLinkingAccount, setIsLinkingAccount] = useState(false);
 
   useEffect(() => {
     loadAccounts();
   }, []);
+
+  // Plaid Link success handler
+  const onPlaidSuccess = useCallback(async (public_token: string) => {
+    try {
+      setIsLinkingAccount(true);
+      toast.loading('Linking your bank account...');
+      
+      // Exchange public token
+      await PlaidService.exchangePublicToken(public_token);
+      
+      // Sync accounts
+      await PlaidService.syncAccounts();
+      
+      // Sync transactions
+      await PlaidService.syncTransactions();
+      
+      toast.dismiss();
+      toast.success('Bank account linked successfully! 🎉');
+      
+      // Reload accounts
+      await loadAccounts();
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Failed to link bank account');
+      console.error('Plaid link error:', error);
+    } finally {
+      setIsLinkingAccount(false);
+    }
+  }, []);
+
+  // Initialize Plaid Link
+  const { open: openPlaidLink, ready: plaidReady } = usePlaidLink({
+    token: linkToken,
+    onSuccess: onPlaidSuccess,
+  });
+
+  // Create link token and open Plaid Link
+  const handleLinkBankAccount = async () => {
+    try {
+      toast.loading('Initializing Plaid Link...');
+      const token = await PlaidService.createLinkToken();
+      setLinkToken(token);
+      toast.dismiss();
+      
+      // Open Plaid Link modal after token is set
+      setTimeout(() => {
+        if (token) {
+          openPlaidLink();
+        }
+      }, 100);
+    } catch (error) {
+      toast.dismiss();
+      toast.error('Failed to initialize Plaid Link');
+      console.error('Failed to create link token:', error);
+    }
+  };
+
+  // Open Plaid Link when token is ready
+  useEffect(() => {
+    if (linkToken && plaidReady) {
+      openPlaidLink();
+    }
+  }, [linkToken, plaidReady, openPlaidLink]);
 
   const loadAccounts = async () => {
     setIsLoading(true);
@@ -64,13 +131,23 @@ export default function AccountsPage() {
           <h1 className="text-3xl font-bold text-gray-900">Accounts</h1>
           <p className="text-gray-600 mt-1">Manage your bank accounts and credit cards</p>
         </div>
-        <button 
-          onClick={() => setIsAddModalOpen(true)}
-          className="btn-primary flex items-center gap-2"
-        >
-          <Plus className="h-5 w-5" />
-          Add Account
-        </button>
+        <div className="flex gap-3">
+          <button 
+            onClick={handleLinkBankAccount}
+            disabled={isLinkingAccount}
+            className="btn-secondary flex items-center gap-2"
+          >
+            <LinkIcon className="h-5 w-5" />
+            Link Bank Account
+          </button>
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="btn-primary flex items-center gap-2"
+          >
+            <Plus className="h-5 w-5" />
+            Add Manually
+          </button>
+        </div>
       </div>
 
       {/* Error Message */}

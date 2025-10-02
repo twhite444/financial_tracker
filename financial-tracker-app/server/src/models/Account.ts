@@ -9,6 +9,8 @@ export interface IAccount extends Document {
   creditLimit?: number;
   currency: string;
   isActive: boolean;
+  plaidAccountId?: string;
+  isPlaidLinked: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -53,6 +55,14 @@ const accountSchema = new Schema<IAccount>(
     isActive: {
       type: Boolean,
       default: true,
+    },
+    plaidAccountId: {
+      type: String,
+      sparse: true, // Allows multiple null values but unique non-null values
+    },
+    isPlaidLinked: {
+      type: Boolean,
+      default: false,
     },
   },
   {
