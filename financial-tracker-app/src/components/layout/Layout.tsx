@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import { useAuthStore } from '../../stores/authStore';
 import { cn } from '../../utils/helpers';
+import ThemeToggle from '../common/ThemeToggle';
 
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -61,17 +62,20 @@ export default function Layout() {
           </nav>
 
           {/* User Section */}
-          <div className="border-t border-gray-200 pt-4 mt-4">
-            <div className="flex items-center gap-3 px-2 mb-3">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
+            <div className="flex items-center justify-between px-2 mb-3">
+              <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium">
                 {user?.name?.charAt(0) || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                   {user?.name || 'User'}
                 </p>
-                <p className="text-xs text-gray-500 truncate">{user?.email}</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
               </div>
+              </div>
+              <ThemeToggle />
             </div>
             <button
               onClick={handleLogout}
@@ -90,7 +94,9 @@ export default function Layout() {
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             FinanceTracker
           </h1>
-          <button
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             className="glass-button p-2"
           >
@@ -100,6 +106,7 @@ export default function Layout() {
               <Menu className="h-6 w-6" />
             )}
           </button>
+          </div>
         </div>
 
         {/* Mobile Menu */}
