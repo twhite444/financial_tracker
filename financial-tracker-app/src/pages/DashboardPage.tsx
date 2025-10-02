@@ -9,6 +9,7 @@ import { Account } from '../models/Account';
 import { Transaction } from '../models/Transaction';
 import { PaymentReminder } from '../models/PaymentReminder';
 import { DashboardSkeleton } from '../components/common/Skeletons';
+import FinancialHealthScore from '../components/dashboard/FinancialHealthScore';
 
 // Spending colors for category breakdown
 const spendingColors: Record<string, string> = {
@@ -171,10 +172,17 @@ export default function DashboardPage() {
         ))}
       </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Financial Health Score + Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Financial Health Score */}
+        <FinancialHealthScore 
+          accounts={accounts}
+          transactions={transactions}
+          payments={payments}
+        />
+
         {/* Balance Trend Chart */}
-        <div className="glass-card p-6">
+        <div className="glass-card p-6 lg:col-span-2">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Balance Trend</h3>
           <ResponsiveContainer width="100%" height={250}>
             <LineChart data={balanceTrendData}>
@@ -189,7 +197,10 @@ export default function DashboardPage() {
             </LineChart>
           </ResponsiveContainer>
         </div>
+      </div>
 
+      {/* Spending Breakdown Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Spending Breakdown Pie Chart */}
         <div className="glass-card p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Spending Breakdown</h3>
