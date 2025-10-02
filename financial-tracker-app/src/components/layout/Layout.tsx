@@ -31,16 +31,16 @@ export default function Layout() {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen relative">
       {/* Sidebar - Desktop */}
       <aside className="fixed left-0 top-0 z-40 h-screen w-64 hidden lg:block">
-        <div className="h-full glass-card m-4 p-6 flex flex-col">
+        <div className="h-full glass-card m-4 p-6 flex flex-col overflow-y-auto">
           {/* Logo */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <div className="mb-8 flex-shrink-0">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
               FinanceTracker
             </h1>
-            <p className="text-sm text-gray-500 mt-1">Track your wealth</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">Track your wealth</p>
           </div>
 
           {/* Navigation */}
@@ -63,26 +63,26 @@ export default function Layout() {
           </nav>
 
           {/* User Section */}
-          <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4">
-            <div className="flex items-center justify-between px-2 mb-3">
-              <div className="flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-medium">
+          <div className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4 flex-shrink-0">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-purple-500 flex items-center justify-center text-white font-semibold shadow-md">
                 {user?.name?.charAt(0) || 'U'}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white truncate">
                   {user?.name || 'User'}
                 </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
+                <p className="text-xs text-gray-600 dark:text-gray-400 truncate">{user?.email}</p>
               </div>
               </div>
               <ThemeToggle />
             </div>
             <button
               onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-xl transition-colors"
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors min-h-[48px]"
             >
-              <LogOut className="h-4 w-4" />
+              <LogOut className="h-5 w-5" />
               <span>Logout</span>
             </button>
           </div>
@@ -90,21 +90,22 @@ export default function Layout() {
       </aside>
 
       {/* Mobile Header */}
-      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-card m-4">
-        <div className="flex items-center justify-between p-4">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+      <header className="lg:hidden fixed top-0 left-0 right-0 z-50 glass-card m-2 sm:m-4">
+        <div className="flex items-center justify-between p-3 sm:p-4">
+          <h1 className="text-lg sm:text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 dark:from-blue-400 dark:to-purple-400 bg-clip-text text-transparent">
             FinanceTracker
           </h1>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <button
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="glass-button p-2"
+            className="glass-button p-2.5"
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           >
             {isMobileMenuOpen ? (
-              <X className="h-6 w-6" />
+              <X className="h-6 w-6 text-gray-700 dark:text-gray-300" />
             ) : (
-              <Menu className="h-6 w-6" />
+              <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
             )}
           </button>
           </div>
@@ -145,7 +146,7 @@ export default function Layout() {
       </header>
 
       {/* Main Content */}
-      <main className="lg:ml-72 pt-24 lg:pt-4 px-4 pb-24 md:pb-8">
+      <main className="lg:ml-72 pt-20 sm:pt-24 lg:pt-8 px-3 sm:px-4 md:px-6 pb-24 md:pb-8 max-w-[1600px] mx-auto">
         <Outlet />
       </main>
 
