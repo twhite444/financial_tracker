@@ -11,7 +11,7 @@ import AccountsPage from './pages/AccountsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import TransactionsPage from './pages/TransactionsPage';
 import HistoryPage from './pages/HistoryPage';
-import CasharooDemoPage from './pages/CasharooDemoPage';
+import BrandDemoPage from './pages/CasharooDemoPage';
 import QuickActions from './components/common/QuickActions';
 
 function App() {
@@ -56,8 +56,8 @@ function App() {
             element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
           />
           
-          {/* Casharoo Brand Demo (accessible without auth for design review) */}
-          <Route path="/casharoo-demo" element={<CasharooDemoPage />} />
+          {/* Brand Demo (accessible without auth for design review) */}
+          <Route path="/casharoo-demo" element={<BrandDemoPage />} />
 
           {/* Protected Routes */}
           <Route

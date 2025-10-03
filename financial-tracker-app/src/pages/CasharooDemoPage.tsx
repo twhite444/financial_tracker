@@ -1,9 +1,10 @@
-import CasharooBrandKit from '../components/brand/CasharooBrandKit';
+import BrandKit from '../components/brand/BrandKit';
 
 /**
- * Casharoo Brand Demo Page
+ * Brand Demo Page
  * Access at /casharoo-demo to see the full brand kit
+ * All branding configured via src/config/brand.config.ts
  */
-export default function CasharooDemoPage() {
-  return <CasharooBrandKit />;
+export default function BrandDemoPage() {
+  return <BrandKit />;
 }

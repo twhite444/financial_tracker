@@ -1,5 +1,5 @@
 /* Import Casharoo Theme Variables first */
-@import './styles/casharoo-theme.css';
+@import './styles/brand-theme.css';
 
 @tailwind base;
 @tailwind components;
