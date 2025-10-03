@@ -1,5 +1,6 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
+import { AnimatePresence } from 'framer-motion';
 import { useAuthStore } from './stores/authStore';
 import { ThemeProvider } from './contexts/ThemeContext';
 import Layout from './components/layout/Layout';
@@ -13,6 +14,7 @@ import QuickActions from './components/common/QuickActions';
 
 function App() {
   const { isAuthenticated } = useAuthStore();
+  const location = useLocation();
 
   return (
     <ThemeProvider>
@@ -40,32 +42,34 @@ function App() {
           },
         }}
       />
-      <Routes>
-      {/* Public Routes */}
-      <Route
-        path="/login"
-        element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
-      />
-      <Route
-        path="/register"
-        element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
-      />
+      <AnimatePresence mode="wait">
+        <Routes location={location} key={location.pathname}>
+          {/* Public Routes */}
+          <Route
+            path="/login"
+            element={!isAuthenticated ? <LoginPage /> : <Navigate to="/dashboard" replace />}
+          />
+          <Route
+            path="/register"
+            element={!isAuthenticated ? <RegisterPage /> : <Navigate to="/dashboard" replace />}
+          />
 
-      {/* Protected Routes */}
-      <Route
-        path="/"
-        element={isAuthenticated ? <Layout /> : <Navigate to="/login" replace />}
-      >
-        <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="accounts" element={<AccountsPage />} />
-        <Route path="payments" element={<PaymentsPage />} />
-        <Route path="transactions" element={<TransactionsPage />} />
-      </Route>
+          {/* Protected Routes */}
+          <Route
+            path="/"
+            element={isAuthenticated ? <Layout /> : <Navigate to="/login" replace />}
+          >
+            <Route index element={<Navigate to="/dashboard" replace />} />
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="accounts" element={<AccountsPage />} />
+            <Route path="payments" element={<PaymentsPage />} />
+            <Route path="transactions" element={<TransactionsPage />} />
+          </Route>
 
-      {/* Catch all */}
-      <Route path="*" element={<Navigate to="/login" replace />} />
-    </Routes>
+          {/* Catch all */}
+          <Route path="*" element={<Navigate to="/login" replace />} />
+        </Routes>
+      </AnimatePresence>
 
     {/* Quick Actions FAB - Only show when authenticated */}
     {isAuthenticated && <QuickActions />}

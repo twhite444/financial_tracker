@@ -1,6 +1,7 @@
 import { Plus, Search, Download, ArrowUpRight, ArrowDownLeft, Calendar, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import Modal from '../components/common/Modal';
 import { TransactionService } from '../services/data/TransactionService';
@@ -10,6 +11,8 @@ import { Account } from '../models/Account';
 import { TableRowSkeleton } from '../components/common/Skeletons';
 import { useSearchParams } from 'react-router-dom';
 import AdvancedFilters, { TransactionFilters, FilterPreset } from '../components/transactions/AdvancedFilters';
+import AnimatedPage from '../components/common/AnimatedPage';
+import { listContainer, listItem } from '../utils/animations';
 
 const categories = ['All', 'Income', 'Groceries', 'Dining', 'Shopping', 'Transportation', 'Entertainment', 'Health', 'Utilities'];
 

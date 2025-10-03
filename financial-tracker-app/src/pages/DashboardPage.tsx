@@ -2,6 +2,7 @@ import { DollarSign, TrendingUp, CreditCard, Wallet, ArrowUpRight, ArrowDownRigh
 import { formatCurrency } from '../utils/helpers';
 import { LineChart, Line, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { AccountService } from '../services/data/AccountService';
 import { TransactionService } from '../services/data/TransactionService';
 import { PaymentService } from '../services/data/PaymentService';
@@ -10,6 +11,8 @@ import { Transaction } from '../models/Transaction';
 import { PaymentReminder } from '../models/PaymentReminder';
 import { DashboardSkeleton } from '../components/common/Skeletons';
 import FinancialHealthScore from '../components/dashboard/FinancialHealthScore';
+import AnimatedPage from '../components/common/AnimatedPage';
+import { cardContainer, cardItem } from '../utils/animations';
 
 // Spending colors for category breakdown
 const spendingColors: Record<string, string> = {
@@ -125,11 +128,11 @@ export default function DashboardPage() {
   ];
   
   return (
-    <div className="space-y-8 animate-fade-in">
+    <AnimatedPage className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Welcome back! Here's your financial overview.</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-1">Welcome back! Here's your financial overview.</p>
       </div>
 
       {/* Error Message */}
@@ -326,6 +329,6 @@ export default function DashboardPage() {
       </div>
         </>
       )}
-    </div>
+    </AnimatedPage>
   );
 }
