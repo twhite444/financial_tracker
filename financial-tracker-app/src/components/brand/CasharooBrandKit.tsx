@@ -4,69 +4,70 @@ import { useEffect, useState } from 'react'
 /**
  * Casharoo – Logo & Loading Screen Kit
  * -------------------------------------------------
- * This single file gives you:
- * 1) Four logo variants (SVG) + a wordmark and favicon ideas
- * 2) Five distinct loading/landing backgrounds with subtle animations
- * 3) Minimal animation primitives you can reuse across the app
- *
- * Drop this file anywhere in your app and render <CasharooBrandKit /> to preview.
- * Copy/paste the logo components wherever you need them (header, splash, favicon, etc.).
- * Tailwind required. Framer Motion required.
+ * Updated to use custom PNG logos.
+ * Replace placeholder images in public/logos/ directory with your own:
+ * - casharoo-mark.png (main logo - square format, ~200x200px minimum)
+ * - casharoo-coin.png (circular variant - square format, ~200x200px minimum)
+ * - casharoo-wordmark.png (horizontal text logo - ~600x200px, transparent bg)
+ * - casharoo-full-logo.png (mark + wordmark combined - ~600x200px)
+ * - casharoo-favicon.png (small icon - 64x64px minimum for favicon)
  */
 
 /******************************
  *        LOGO VARIANTS        *
  ******************************/
 
-// 1) Roo Mark (abstract kangaroo formed by cash curve)
+// 1) Roo Mark (main logo - your primary brand mark)
 export const CasharooMark = ({ className = 'w-16 h-16' }) => (
-  <svg viewBox="0 0 64 64" className={className} fill="none" aria-label="Casharoo mark">
-    {/* coin */}
-    <circle cx="46" cy="18" r="6" className="fill-amber-400" />
-    <circle cx="46" cy="18" r="6" className="fill-transparent stroke-amber-500" strokeWidth="2" />
-    {/* roo body as a flowing S = cash curve */}
-    <path
-      d="M10 40c10-12 20-8 26-18 2.5-4 6-6 10-6 4 0 8 2.5 8 7 0 5-4 8-9 9-6 1-11 3-14 7-2.5 3-3 7-3 12"
-      className="stroke-emerald-500 dark:stroke-emerald-400"
-      strokeWidth="4"
-      strokeLinecap="round"
-      fill="none"
-    />
-    {/* tail / hop line */}
-    <path d="M8 48c6 0 10 2 14 6" className="stroke-emerald-600/60" strokeWidth="3" strokeLinecap="round" />
-    {/* ear */}
-    <path d="M34 17l4-6" className="stroke-emerald-500" strokeWidth="3" strokeLinecap="round" />
-  </svg>
+  <img 
+    src="/logos/casharoo-mark.png" 
+    alt="Casharoo mark" 
+    className={className}
+    loading="lazy"
+  />
 )
 
-// 2) Roo Coin (wallaby face embedded in a coin)
+// 2) Roo Coin (circular logo variant - good for avatars, app icons)
 export const CasharooCoin = ({ className = 'w-16 h-16' }) => (
-  <svg viewBox="0 0 64 64" className={className} aria-label="Casharoo coin">
-    <defs>
-      <radialGradient id="g" cx="50%" cy="35%" r="70%">
-        <stop offset="0%" stopColor="#fde68a" />
-        <stop offset="100%" stopColor="#f59e0b" />
-      </radialGradient>
-    </defs>
-    <circle cx="32" cy="32" r="24" fill="url(#g)" />
-    <circle cx="32" cy="32" r="24" className="fill-transparent stroke-amber-600" strokeWidth="2" />
-    {/* minimal roo */}
-    <path d="M20 38c6-8 18-8 24 0" className="fill-none stroke-emerald-700" strokeWidth="3" strokeLinecap="round" />
-    <circle cx="24" cy="26" r="2" className="fill-emerald-800" />
-    <circle cx="32" cy="24" r="1.5" className="fill-emerald-800" />
-    <path d="M30 22l6-6" className="stroke-emerald-700" strokeWidth="3" strokeLinecap="round" />
-  </svg>
+  <img 
+    src="/logos/casharoo-coin.png" 
+    alt="Casharoo coin" 
+    className={className}
+    loading="lazy"
+  />
 )
 
-// 3) Wordmark (display type – swap fonts if you have a brand font)
-export const CasharooWordmark = ({ className = 'text-3xl' }) => (
-  <div className={`font-semibold tracking-tight ${className}`} aria-label="Casharoo">
-    <span className="text-emerald-500">Casha</span>
-    <span className="text-emerald-700 dark:text-emerald-300">roo</span>
-  </div>
+// 3) Wordmark (horizontal text logo - for headers, footers)
+export const CasharooWordmark = ({ className = 'h-8' }) => (
+  <img 
+    src="/logos/casharoo-wordmark.png" 
+    alt="Casharoo" 
+    className={className}
+    loading="lazy"
+  />
 )
 
-// 4) Roo Hop (animated mark for loaders)
+// 4) Favicon (small icon - for browser tab, bookmarks)
+export const CasharooFavicon = ({ className = 'w-8 h-8' }) => (
+  <img 
+    src="/logos/casharoo-favicon.png" 
+    alt="Casharoo icon" 
+    className={className}
+    loading="lazy"
+  />
+)
+
+// 5) Full Logo (mark + wordmark combined - for landing pages, marketing)
+export const CasharooFullLogo = ({ className = 'h-12' }) => (
+  <img 
+    src="/logos/casharoo-full-logo.png" 
+    alt="Casharoo" 
+    className={className}
+    loading="lazy"
+  />
+)
+
+// 6) Roo Hop (animated mark for loaders - uses CasharooMark)
 export const CasharooHop = ({ size = 56 }) => (
   <motion.div
     className="inline-flex items-center justify-center"
@@ -74,22 +75,12 @@ export const CasharooHop = ({ size = 56 }) => (
     animate={{ y: [0, -8, 0] }}
     transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
   >
-    <CasharooMark className={`w-[${size}px] h-[${size}px]`} />
+    <img 
+      src="/logos/casharoo-mark.png" 
+      alt="Casharoo" 
+      style={{ width: `${size}px`, height: `${size}px` }}
+    />
   </motion.div>
-)
-
-/******************************
- *      FAVICON SUGGESTIONS    *
- ******************************/
-export const Favicons = () => (
-  <div className="grid grid-cols-6 gap-3">
-    <div className="size-10 rounded-xl bg-emerald-500 flex items-center justify-center text-white">💲</div>
-    <div className="size-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white">🦘</div>
-    <div className="size-10 rounded-xl bg-amber-400 flex items-center justify-center">🪙</div>
-    <div className="size-10 rounded-xl bg-emerald-700 flex items-center justify-center text-white">CR</div>
-    <div className="size-10 rounded-xl bg-gradient-to-br from-emerald-400 to-emerald-700 flex items-center justify-center text-white">¢</div>
-    <div className="size-10 rounded-xl bg-emerald-500/20 ring-1 ring-emerald-500/40 flex items-center justify-center text-emerald-700">roo</div>
-  </div>
 )
 
 /******************************
@@ -165,12 +156,16 @@ const LoaderBars = () => (
 )
 
 const LoaderCoinSpin = () => (
-  <motion.div
-    className="size-12 rounded-full bg-amber-400 ring-2 ring-amber-600 shadow"
-    animate={{ rotateY: [0, 180, 360] }}
-    transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
-    style={{ transformStyle: 'preserve-3d' }}
-  />
+  <motion.div className="relative size-12">
+    <motion.img
+      src="/logos/casharoo-coin.png"
+      alt="Loading"
+      className="size-12 rounded-full shadow"
+      animate={{ rotateY: [0, 180, 360] }}
+      transition={{ duration: 1.1, repeat: Infinity, ease: 'linear' }}
+      style={{ transformStyle: 'preserve-3d' }}
+    />
+  </motion.div>
 )
 
 /******************************
@@ -229,16 +224,30 @@ export default function CasharooBrandKit() {
         <div className="py-10">
           <SplashCard title="Casharoo" subtitle="Personal finance, with personality.">
             <div className="grid sm:grid-cols-2 gap-8">
-              <Section label="Logos">
+              <Section label="Logo Variants">
                 <div className="flex items-center gap-6 flex-wrap">
-                  <CasharooMark />
-                  <CasharooCoin />
-                  <CasharooWordmark />
-                  <CasharooHop />
+                  <div className="text-center">
+                    <CasharooMark />
+                    <p className="text-xs mt-2 opacity-60">Mark</p>
+                  </div>
+                  <div className="text-center">
+                    <CasharooCoin />
+                    <p className="text-xs mt-2 opacity-60">Coin</p>
+                  </div>
+                  <div className="text-center">
+                    <CasharooWordmark />
+                    <p className="text-xs mt-2 opacity-60">Wordmark</p>
+                  </div>
+                  <div className="text-center">
+                    <CasharooFavicon />
+                    <p className="text-xs mt-2 opacity-60">Favicon</p>
+                  </div>
                 </div>
               </Section>
-              <Section label="Favicons / App Icons">
-                <Favicons />
+              <Section label="Full Logo">
+                <div className="flex items-center">
+                  <CasharooFullLogo />
+                </div>
               </Section>
               <Section label="Loaders">
                 <div className="flex items-center gap-6">
@@ -258,7 +267,7 @@ export default function CasharooBrandKit() {
         </div>
       </BG>
 
-      <footer className="py-10 text-center text-xs opacity-60">Casharoo Brand Kit • Swap colors via Tailwind tokens • All SVGs inline-editable</footer>
+      <footer className="py-10 text-center text-xs opacity-60">Casharoo Brand Kit • Replace PNG logos in public/logos/ directory • Aurora gradient (#1) is your favorite!</footer>
     </div>
   )
 }
