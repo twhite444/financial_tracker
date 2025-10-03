@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import jwt, { SignOptions } from 'jsonwebtoken';
 import { User, IUser } from '../models/User';
 import { body, validationResult } from 'express-validator';
+import { logUserActivity } from '../services/userActivityService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
@@ -55,6 +56,19 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     await user.save();
 
+    // Log user registration activity
+    await logUserActivity({
+      userId: (user._id as any).toString(),
+      action: 'register',
+      details: 'New user account created',
+      newData: {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+      },
+      req,
+    });
+
     // Generate JWT token
     const userId = (user._id as any).toString();
     const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as SignOptions);
@@ -89,6 +103,15 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Find user and include password field
     const user = await User.findOne({ email }).select('+password');
     if (!user) {
+      // Log failed login attempt
+      await logUserActivity({
+        userId: email, // Use email as identifier for failed attempts
+        action: 'failed_login',
+        details: `Failed login attempt for email: ${email}`,
+        success: false,
+        errorMessage: 'User not found',
+        req,
+      });
       res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
@@ -96,9 +119,26 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Verify password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      // Log failed login attempt
+      await logUserActivity({
+        userId: (user._id as any).toString(),
+        action: 'failed_login',
+        details: `Failed login attempt - invalid password`,
+        success: false,
+        errorMessage: 'Invalid password',
+        req,
+      });
       res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
+
+    // Log successful login
+    await logUserActivity({
+      userId: (user._id as any).toString(),
+      action: 'login',
+      details: 'User logged in successfully',
+      req,
+    });
 
     // Generate JWT token
     const userId = (user._id as any).toString();
