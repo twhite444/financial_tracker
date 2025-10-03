@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Casharoo Theme Variables */
+@import './styles/casharoo-theme.css';
+
 @layer base {
   * {
     @apply border-gray-200 dark:border-gray-700;

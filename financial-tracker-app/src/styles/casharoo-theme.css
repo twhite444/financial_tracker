@@ -1,0 +1,348 @@
+/**
+ * Casharoo Theme Variables
+ * Kangaroo-themed design system with CSS variables
+ */
+
+:root {
+  /* Primary Roo Colors - Emerald/Green (kangaroo/nature) */
+  --casharoo-primary-50: #ecfdf5;
+  --casharoo-primary-100: #d1fae5;
+  --casharoo-primary-200: #a7f3d0;
+  --casharoo-primary-300: #6ee7b7;
+  --casharoo-primary-400: #34d399;
+  --casharoo-primary-500: #10b981;
+  --casharoo-primary-600: #059669;
+  --casharoo-primary-700: #047857;
+  --casharoo-primary-800: #065f46;
+  --casharoo-primary-900: #064e3b;
+  --casharoo-primary-950: #022c22;
+
+  /* Secondary Coin Colors - Amber/Gold (money/coins) */
+  --casharoo-coin-50: #fffbeb;
+  --casharoo-coin-100: #fef3c7;
+  --casharoo-coin-200: #fde68a;
+  --casharoo-coin-300: #fcd34d;
+  --casharoo-coin-400: #fbbf24;
+  --casharoo-coin-500: #f59e0b;
+  --casharoo-coin-600: #d97706;
+  --casharoo-coin-700: #b45309;
+  --casharoo-coin-800: #92400e;
+  --casharoo-coin-900: #78350f;
+
+  /* Hop Accent Colors - Orange (energy/action) */
+  --casharoo-hop-50: #fff7ed;
+  --casharoo-hop-100: #ffedd5;
+  --casharoo-hop-200: #fed7aa;
+  --casharoo-hop-300: #fdba74;
+  --casharoo-hop-400: #fb923c;
+  --casharoo-hop-500: #f97316;
+  --casharoo-hop-600: #ea580c;
+  --casharoo-hop-700: #c2410c;
+  --casharoo-hop-800: #9a3412;
+  --casharoo-hop-900: #7c2d12;
+
+  /* Pouch Colors - Teal (savings/storage) */
+  --casharoo-pouch-50: #f0fdfa;
+  --casharoo-pouch-100: #ccfbf1;
+  --casharoo-pouch-200: #99f6e4;
+  --casharoo-pouch-300: #5eead4;
+  --casharoo-pouch-400: #2dd4bf;
+  --casharoo-pouch-500: #14b8a6;
+  --casharoo-pouch-600: #0d9488;
+  --casharoo-pouch-700: #0f766e;
+  --casharoo-pouch-800: #115e59;
+  --casharoo-pouch-900: #134e4a;
+
+  /* Brand Semantics */
+  --casharoo-brand-primary: var(--casharoo-primary-600);
+  --casharoo-brand-secondary: var(--casharoo-coin-400);
+  --casharoo-brand-accent: var(--casharoo-hop-500);
+  --casharoo-brand-success: var(--casharoo-primary-500);
+  --casharoo-brand-warning: var(--casharoo-coin-500);
+  --casharoo-brand-info: var(--casharoo-pouch-500);
+
+  /* Light Mode */
+  --casharoo-bg-primary: #ffffff;
+  --casharoo-bg-secondary: #f9fafb;
+  --casharoo-bg-tertiary: #f3f4f6;
+  --casharoo-bg-hover: #f3f4f6;
+  --casharoo-bg-active: #e5e7eb;
+  
+  --casharoo-text-primary: #111827;
+  --casharoo-text-secondary: #6b7280;
+  --casharoo-text-tertiary: #9ca3af;
+  --casharoo-text-inverse: #ffffff;
+  
+  --casharoo-border-light: rgba(0, 0, 0, 0.05);
+  --casharoo-border-medium: rgba(0, 0, 0, 0.1);
+  --casharoo-border-strong: rgba(0, 0, 0, 0.2);
+
+  /* Shadows */
+  --casharoo-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --casharoo-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --casharoo-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --casharoo-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Kangaroo-themed shadow (greenish glow) */
+  --casharoo-shadow-roo: 0 4px 14px 0 rgba(16, 185, 129, 0.15);
+  --casharoo-shadow-coin: 0 4px 14px 0 rgba(245, 158, 11, 0.2);
+
+  /* Spacing (based on 4px grid, kangaroo hop metaphor) */
+  --casharoo-space-hop-xs: 0.25rem;   /* 4px - tiny hop */
+  --casharoo-space-hop-sm: 0.5rem;    /* 8px - small hop */
+  --casharoo-space-hop-md: 1rem;      /* 16px - medium hop */
+  --casharoo-space-hop-lg: 1.5rem;    /* 24px - big hop */
+  --casharoo-space-hop-xl: 2rem;      /* 32px - huge hop */
+  --casharoo-space-hop-2xl: 3rem;     /* 48px - mega hop */
+  --casharoo-space-hop-3xl: 4rem;     /* 64px - kangaroo leap */
+
+  /* Border Radius (pouch-like rounded corners) */
+  --casharoo-radius-sm: 0.375rem;     /* 6px */
+  --casharoo-radius-md: 0.5rem;       /* 8px */
+  --casharoo-radius-lg: 0.75rem;      /* 12px */
+  --casharoo-radius-xl: 1rem;         /* 16px */
+  --casharoo-radius-2xl: 1.5rem;      /* 24px */
+  --casharoo-radius-3xl: 2rem;        /* 32px - pouch shape */
+  --casharoo-radius-full: 9999px;     /* pill shape */
+
+  /* Typography */
+  --casharoo-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --casharoo-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  
+  /* Font Weights */
+  --casharoo-font-light: 300;
+  --casharoo-font-normal: 400;
+  --casharoo-font-medium: 500;
+  --casharoo-font-semibold: 600;
+  --casharoo-font-bold: 700;
+
+  /* Transitions */
+  --casharoo-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --casharoo-transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --casharoo-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --casharoo-transition-hop: 400ms cubic-bezier(0.34, 1.56, 0.64, 1); /* bouncy like a kangaroo hop */
+
+  /* Z-Index Stack */
+  --casharoo-z-base: 0;
+  --casharoo-z-dropdown: 1000;
+  --casharoo-z-sticky: 1020;
+  --casharoo-z-fixed: 1030;
+  --casharoo-z-modal-backdrop: 1040;
+  --casharoo-z-modal: 1050;
+  --casharoo-z-popover: 1060;
+  --casharoo-z-tooltip: 1070;
+  --casharoo-z-toast: 1080;
+}
+
+/* Dark Mode Variables */
+.dark {
+  /* Dark Mode Backgrounds */
+  --casharoo-bg-primary: #0a0a0a;
+  --casharoo-bg-secondary: #171717;
+  --casharoo-bg-tertiary: #262626;
+  --casharoo-bg-hover: #262626;
+  --casharoo-bg-active: #404040;
+  
+  /* Dark Mode Text */
+  --casharoo-text-primary: #fafafa;
+  --casharoo-text-secondary: #a3a3a3;
+  --casharoo-text-tertiary: #737373;
+  --casharoo-text-inverse: #0a0a0a;
+  
+  /* Dark Mode Borders */
+  --casharoo-border-light: rgba(255, 255, 255, 0.05);
+  --casharoo-border-medium: rgba(255, 255, 255, 0.1);
+  --casharoo-border-strong: rgba(255, 255, 255, 0.2);
+
+  /* Dark Mode Shadows */
+  --casharoo-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --casharoo-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --casharoo-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --casharoo-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+  
+  /* Dark Mode Kangaroo Shadows */
+  --casharoo-shadow-roo: 0 4px 14px 0 rgba(16, 185, 129, 0.25);
+  --casharoo-shadow-coin: 0 4px 14px 0 rgba(245, 158, 11, 0.3);
+}
+
+/* Utility Classes for Casharoo Theme */
+.casharoo-gradient-roo {
+  background: linear-gradient(135deg, var(--casharoo-primary-500) 0%, var(--casharoo-primary-700) 100%);
+}
+
+.casharoo-gradient-coin {
+  background: linear-gradient(135deg, var(--casharoo-coin-400) 0%, var(--casharoo-coin-600) 100%);
+}
+
+.casharoo-gradient-hop {
+  background: linear-gradient(135deg, var(--casharoo-hop-400) 0%, var(--casharoo-hop-600) 100%);
+}
+
+.casharoo-gradient-aurora {
+  background: radial-gradient(60% 60% at 20% 10%, rgba(16, 185, 129, 0.35), transparent),
+              radial-gradient(40% 40% at 80% 20%, rgba(245, 158, 11, 0.25), transparent),
+              radial-gradient(50% 50% at 50% 80%, rgba(16, 185, 129, 0.25), transparent);
+}
+
+.casharoo-glass {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--casharoo-border-light);
+}
+
+.dark .casharoo-glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--casharoo-border-medium);
+}
+
+/* Kangaroo Hop Animation */
+@keyframes casharoo-hop {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-12px) scale(1.05);
+  }
+}
+
+.casharoo-hop-animation {
+  animation: casharoo-hop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+/* Coin Flip Animation */
+@keyframes casharoo-coin-flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.casharoo-coin-flip {
+  animation: casharoo-coin-flip 1.5s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* Pulse Glow Animation */
+@keyframes casharoo-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+}
+
+.casharoo-pulse-glow {
+  animation: casharoo-pulse-glow 2s ease-in-out infinite;
+}
+
+/* Pouch Bounce Animation */
+@keyframes casharoo-pouch-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.casharoo-pouch-bounce {
+  animation: casharoo-pouch-bounce 0.6s ease-in-out;
+}
+
+/* Focus Styles */
+.casharoo-focus {
+  outline: 2px solid var(--casharoo-primary-500);
+  outline-offset: 2px;
+}
+
+/* Button Styles */
+.casharoo-btn-primary {
+  background: var(--casharoo-brand-primary);
+  color: var(--casharoo-text-inverse);
+  padding: var(--casharoo-space-hop-sm) var(--casharoo-space-hop-lg);
+  border-radius: var(--casharoo-radius-xl);
+  font-weight: var(--casharoo-font-medium);
+  transition: all var(--casharoo-transition-base);
+  box-shadow: var(--casharoo-shadow-roo);
+}
+
+.casharoo-btn-primary:hover {
+  background: var(--casharoo-primary-700);
+  box-shadow: var(--casharoo-shadow-lg);
+  transform: translateY(-1px);
+}
+
+.casharoo-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--casharoo-shadow-sm);
+}
+
+.casharoo-btn-secondary {
+  background: transparent;
+  color: var(--casharoo-brand-primary);
+  padding: var(--casharoo-space-hop-sm) var(--casharoo-space-hop-lg);
+  border-radius: var(--casharoo-radius-xl);
+  border: 1px solid var(--casharoo-brand-primary);
+  font-weight: var(--casharoo-font-medium);
+  transition: all var(--casharoo-transition-base);
+}
+
+.casharoo-btn-secondary:hover {
+  background: var(--casharoo-primary-50);
+}
+
+.dark .casharoo-btn-secondary:hover {
+  background: var(--casharoo-primary-950);
+}
+
+/* Card Styles */
+.casharoo-card {
+  background: var(--casharoo-bg-primary);
+  border: 1px solid var(--casharoo-border-light);
+  border-radius: var(--casharoo-radius-2xl);
+  padding: var(--casharoo-space-hop-lg);
+  box-shadow: var(--casharoo-shadow-md);
+  transition: all var(--casharoo-transition-base);
+}
+
+.casharoo-card:hover {
+  box-shadow: var(--casharoo-shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Input Styles */
+.casharoo-input {
+  background: var(--casharoo-bg-secondary);
+  border: 1px solid var(--casharoo-border-medium);
+  border-radius: var(--casharoo-radius-lg);
+  padding: var(--casharoo-space-hop-sm) var(--casharoo-space-hop-md);
+  color: var(--casharoo-text-primary);
+  transition: all var(--casharoo-transition-base);
+}
+
+.casharoo-input:focus {
+  outline: none;
+  border-color: var(--casharoo-brand-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Badge Styles */
+.casharoo-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--casharoo-space-hop-xs) var(--casharoo-space-hop-sm);
+  border-radius: var(--casharoo-radius-full);
+  font-size: 0.75rem;
+  font-weight: var(--casharoo-font-medium);
+  background: var(--casharoo-primary-100);
+  color: var(--casharoo-primary-800);
+}
+
+.dark .casharoo-badge {
+  background: var(--casharoo-primary-900);
+  color: var(--casharoo-primary-200);
+}

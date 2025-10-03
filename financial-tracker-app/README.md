@@ -52,10 +52,7 @@ Financial Tracker is a **comprehensive personal finance management platform** de
 #### **Future Vision** 🚀
 - 🔮 **AI Financial Assistant** - Natural language interface for financial queries and insights
 - 🔮 **Automated Tax Preparation** - Smart tax filing with automatic categorization and form generation
-- 🔮 **Predictive Analytics** - ML-powered spending forecasts and financial recommendations
-- 🔮 **Multi-currency Support** - International account management
-- 🔮 **Investment Portfolio Tracking** - Stock, crypto, and retirement account integration
-- 🔮 **Bill Negotiation AI** - Automated bill optimization and negotiation
+
 
 ### 💡 Why This Project?
 
@@ -572,9 +569,9 @@ Contributions are welcome! This project is primarily for portfolio purposes, but
 
 **Tom White**
 - GitHub: [@twhite444](https://github.com/twhite444)
-- Email: twhite4@bates.edu
-- LinkedIn: [Your LinkedIn](https://linkedin.com/in/yourprofile)
-- Portfolio: [Your Portfolio](https://yourportfolio.com)
+- Email: tomwhite1207@gmail.com
+- LinkedIn: [Tommo White] (https://www.linkedin.com/in/tom-white-743492201/)
+
 
 Project Link: [https://github.com/twhite444/financial_tracker](https://github.com/twhite444/financial_tracker)
 
