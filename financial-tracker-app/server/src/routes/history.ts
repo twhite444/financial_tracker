@@ -1,6 +1,15 @@
 import express from 'express';
 import { authenticateToken } from '../middleware/auth';
 import {
+  historyRateLimiter,
+  historyQueryValidation,
+  handleValidationErrors,
+  sanitizeQueryParams,
+  sqlInjectionProtection,
+  noSQLInjectionProtection,
+  securityLogger,
+} from '../middleware/security';
+import {
   getTransactionHistory,
   getAccountHistory,
   getPaymentHistory,
@@ -11,7 +20,12 @@ import {
 
 const router = express.Router();
 
-// All history routes require authentication
+// Apply security middleware to all history routes
+router.use(securityLogger);
+router.use(sqlInjectionProtection);
+router.use(noSQLInjectionProtection);
+router.use(sanitizeQueryParams);
+router.use(historyRateLimiter);
 router.use(authenticateToken);
 
 /**
@@ -20,7 +34,12 @@ router.use(authenticateToken);
  * @query   transactionId, action, limit, skip
  * @access  Private
  */
-router.get('/transactions', getTransactionHistory);
+router.get(
+  '/transactions',
+  historyQueryValidation,
+  handleValidationErrors,
+  getTransactionHistory
+);
 
 /**
  * @route   GET /api/history/accounts
@@ -28,7 +47,12 @@ router.get('/transactions', getTransactionHistory);
  * @query   accountId, action, limit, skip
  * @access  Private
  */
-router.get('/accounts', getAccountHistory);
+router.get(
+  '/accounts',
+  historyQueryValidation,
+  handleValidationErrors,
+  getAccountHistory
+);
 
 /**
  * @route   GET /api/history/payments
@@ -36,7 +60,12 @@ router.get('/accounts', getAccountHistory);
  * @query   paymentId, action, limit, skip
  * @access  Private
  */
-router.get('/payments', getPaymentHistory);
+router.get(
+  '/payments',
+  historyQueryValidation,
+  handleValidationErrors,
+  getPaymentHistory
+);
 
 /**
  * @route   GET /api/history/activity
@@ -44,7 +73,12 @@ router.get('/payments', getPaymentHistory);
  * @query   action, startDate, endDate, limit, skip
  * @access  Private
  */
-router.get('/activity', getUserActivity);
+router.get(
+  '/activity',
+  historyQueryValidation,
+  handleValidationErrors,
+  getUserActivity
+);
 
 /**
  * @route   GET /api/history/activity/stats
@@ -52,7 +86,11 @@ router.get('/activity', getUserActivity);
  * @query   days (default: 30)
  * @access  Private
  */
-router.get('/activity/stats', getUserActivityStats);
+router.get(
+  '/activity/stats',
+  handleValidationErrors,
+  getUserActivityStats
+);
 
 /**
  * @route   GET /api/history/all
@@ -60,6 +98,11 @@ router.get('/activity/stats', getUserActivityStats);
  * @query   limit, skip
  * @access  Private
  */
-router.get('/all', getAllHistory);
+router.get(
+  '/all',
+  historyQueryValidation,
+  handleValidationErrors,
+  getAllHistory
+);
 
 export default router;

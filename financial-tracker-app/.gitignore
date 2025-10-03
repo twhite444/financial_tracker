@@ -63,4 +63,39 @@ Thumbs.db
 *.key
 *.pem
 *.cert
+*.p12
 secrets/
+config/secrets/
+.secrets/
+
+# Environment-specific configs
+.env.production
+.env.production.local
+.env.staging
+.env.development.local
+
+# API keys and tokens
+*_token
+*_secret
+*_key
+api-keys.json
+credentials.json
+
+# Database backups
+*.dump
+*.backup
+backups/
+
+# Security audit files
+security-report.json
+vulnerability-report.json
+
+# SSH keys
+id_rsa
+id_rsa.pub
+*.ppk
+
+# Cloud provider credentials
+.aws/
+.gcloud/
+.azure/

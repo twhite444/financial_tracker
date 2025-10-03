@@ -5,6 +5,7 @@ import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
 import { connectDatabase } from './config/database';
+import { securityHeaders, sanitizeErrorResponse } from './middleware/security';
 
 // Import routes
 import authRoutes from './routes/auth';
@@ -24,7 +25,8 @@ const PORT = process.env.PORT || 5000;
 connectDatabase();
 
 // Security Middleware
-app.use(helmet()); // Security headers
+app.use(helmet()); // Basic security headers
+app.use(securityHeaders); // Additional security headers
 app.use(
   cors({
     origin: process.env.NODE_ENV === 'development' 
@@ -79,13 +81,11 @@ app.use((_req: Request, res: Response) => {
 });
 
 // Global error handler
-app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error('Global error handler:', err);
   
-  res.status(500).json({
-    error: process.env.NODE_ENV === 'development' ? err.message : 'Internal server error',
-    ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
-  });
+  // Sanitize error response to prevent information leakage
+  sanitizeErrorResponse(err, req, res, next);
 });
 
 // Start server

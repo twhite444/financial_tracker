@@ -3,6 +3,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import { User, IUser } from '../models/User';
 import { body, validationResult } from 'express-validator';
 import { logUserActivity } from '../services/userActivityService';
+import { checkAndLogAnomalies } from '../services/anomalyDetectionService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production';
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
@@ -119,29 +120,43 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     // Verify password
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) {
+      const userId = (user._id as any).toString();
+      
       // Log failed login attempt
       await logUserActivity({
-        userId: (user._id as any).toString(),
+        userId,
         action: 'failed_login',
         details: `Failed login attempt - invalid password`,
         success: false,
         errorMessage: 'Invalid password',
         req,
       });
+
+      // Check for anomalies after failed login
+      checkAndLogAnomalies(userId).catch(err => {
+        console.error('Error checking anomalies:', err);
+      });
+
       res.status(401).json({ error: 'Invalid email or password' });
       return;
     }
 
+    const userId = (user._id as any).toString();
+
     // Log successful login
     await logUserActivity({
-      userId: (user._id as any).toString(),
+      userId,
       action: 'login',
       details: 'User logged in successfully',
       req,
     });
 
+    // Check for anomalies after login
+    checkAndLogAnomalies(userId).catch(err => {
+      console.error('Error checking anomalies:', err);
+    });
+
     // Generate JWT token
-    const userId = (user._id as any).toString();
     const token = jwt.sign({ userId }, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN } as SignOptions);
 
     res.status(200).json({

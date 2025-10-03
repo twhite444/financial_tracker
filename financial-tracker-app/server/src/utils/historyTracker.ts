@@ -1,4 +1,5 @@
 import { Document } from 'mongoose';
+import { sanitizeForLogging } from './dataMasking';
 
 /**
  * Utility to track changes between two objects
@@ -33,10 +34,18 @@ export function trackChanges<T extends Document>(
     }
   });
 
+  // Sanitize sensitive data before returning
+  const sanitizedPreviousData = Object.keys(previousData).length > 0 
+    ? sanitizeForLogging(previousData) 
+    : undefined;
+  const sanitizedNewData = Object.keys(newData).length > 0 
+    ? sanitizeForLogging(newData) 
+    : undefined;
+
   return {
     changedFields,
-    previousData: Object.keys(previousData).length > 0 ? previousData : undefined,
-    newData: Object.keys(newData).length > 0 ? newData : undefined,
+    previousData: sanitizedPreviousData,
+    newData: sanitizedNewData,
   };
 }
 
@@ -68,5 +77,6 @@ export function createDocumentSnapshot<T extends Document>(
     snapshot[field] = (doc as any)[field];
   });
   
-  return snapshot;
+  // Sanitize sensitive data in the snapshot
+  return sanitizeForLogging(snapshot);
 }
