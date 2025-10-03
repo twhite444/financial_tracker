@@ -10,6 +10,7 @@ import DashboardPage from './pages/DashboardPage';
 import AccountsPage from './pages/AccountsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import TransactionsPage from './pages/TransactionsPage';
+import HistoryPage from './pages/HistoryPage';
 import QuickActions from './components/common/QuickActions';
 
 function App() {
@@ -64,6 +65,7 @@ function App() {
             <Route path="accounts" element={<AccountsPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="transactions" element={<TransactionsPage />} />
+            <Route path="history" element={<HistoryPage />} />
           </Route>
 
           {/* Catch all */}

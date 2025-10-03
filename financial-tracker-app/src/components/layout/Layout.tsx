@@ -4,6 +4,7 @@ import {
   Wallet, 
   Calendar, 
   Receipt, 
+  History,
   LogOut,
   Menu,
   X
@@ -19,6 +20,7 @@ const navigation = [
   { name: 'Accounts', href: '/accounts', icon: Wallet },
   { name: 'Payments', href: '/payments', icon: Calendar },
   { name: 'Transactions', href: '/transactions', icon: Receipt },
+  { name: 'History', href: '/history', icon: History },
 ];
 
 export default function Layout() {
