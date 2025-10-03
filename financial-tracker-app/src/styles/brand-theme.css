@@ -1,26 +1,5 @@
 /**
  * Brand Theme Variables
- * -------------------------------------------------
- * All colors, spacing, and animation values in one place.
- * Change these CSS variables to rebrand the entire application.
- * 
- * Current Brand: Casharoo (emerald/kangaroo theme)
- * To rebrand: Replace color values below with your brand colors.
- */
-
-:root {
-  /* ==================== PRIMARY BRAND COLORS ==================== */
-  --brand-primary-50: #ecfdf5;
-  --brand-primary-100: #d1fae5;
-  --brand-primary-200: #a7f3d0;
-  --brand-primary-300: #6ee7b7;
-  --brand-primary-400: #34d399;
-  --brand-primary-500: #10b981;   /* Main brand color */
-  --brand-primary-600: #059669;
-  --brand-primary-700: #047857;
-  --brand-primary-800: #065f46;
-  --brand-primary-900: #064e3b;
-  --brand-primary-950: #022c22;me Variables
  * Kangaroo-themed design system with CSS variables
  */
 
@@ -50,6 +29,14 @@
   --brand-coin-800: #92400e;
   --brand-coin-900: #78350f;
 
+  /* Accent colors (alias for coin) */
+  --brand-accent-400: var(--brand-coin-400);
+  --brand-accent-500: var(--brand-coin-500);
+  --brand-accent-600: var(--brand-coin-600);
+  --brand-accent-700: var(--brand-coin-700);
+  --brand-accent-800: var(--brand-coin-800);
+  --brand-accent-900: var(--brand-coin-900);
+
   /* Hop Accent Colors - Orange (energy/action) */
   --brand-hop-50: #fff7ed;
   --brand-hop-100: #ffedd5;
@@ -62,6 +49,14 @@
   --brand-hop-800: #9a3412;
   --brand-hop-900: #7c2d12;
 
+  /* Secondary colors (alias for hop) */
+  --brand-secondary-400: var(--brand-hop-400);
+  --brand-secondary-500: var(--brand-hop-500);
+  --brand-secondary-600: var(--brand-hop-600);
+  --brand-secondary-700: var(--brand-hop-700);
+  --brand-secondary-800: var(--brand-hop-800);
+  --brand-secondary-900: var(--brand-hop-900);
+
   /* Pouch Colors - Teal (savings/storage) */
   --brand-pouch-50: #f0fdfa;
   --brand-pouch-100: #ccfbf1;
@@ -73,6 +68,13 @@
   --brand-pouch-700: #0f766e;
   --brand-pouch-800: #115e59;
   --brand-pouch-900: #134e4a;
+
+  /* Tertiary colors (alias for pouch) */
+  --brand-tertiary-500: var(--brand-pouch-500);
+  --brand-tertiary-600: var(--brand-pouch-600);
+  --brand-tertiary-700: var(--brand-pouch-700);
+  --brand-tertiary-800: var(--brand-pouch-800);
+  --brand-tertiary-900: var(--brand-pouch-900);
 
   /* Brand Semantics */
   --brand-brand-primary: var(--brand-primary-600);
