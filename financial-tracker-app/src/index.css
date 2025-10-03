@@ -1,9 +1,9 @@
+/* Import Casharoo Theme Variables first */
+@import './styles/casharoo-theme.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* Import Casharoo Theme Variables */
-@import './styles/casharoo-theme.css';
 
 @layer base {
   * {
