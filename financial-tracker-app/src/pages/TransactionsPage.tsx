@@ -1,4 +1,4 @@
-import { Plus, Search, Download, Filter, ArrowUpRight, ArrowDownLeft, Calendar, Building2, Trash2 } from 'lucide-react';
+import { Plus, Search, Download, ArrowUpRight, ArrowDownLeft, Calendar, Trash2 } from 'lucide-react';
 import { formatCurrency, formatDate } from '../utils/helpers';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
@@ -9,8 +9,11 @@ import { Transaction } from '../models/Transaction';
 import { Account } from '../models/Account';
 import { TableRowSkeleton } from '../components/common/Skeletons';
 import { useSearchParams } from 'react-router-dom';
+import AdvancedFilters, { TransactionFilters, FilterPreset } from '../components/transactions/AdvancedFilters';
 
 const categories = ['All', 'Income', 'Groceries', 'Dining', 'Shopping', 'Transportation', 'Entertainment', 'Health', 'Utilities'];
+
+const PRESETS_STORAGE_KEY = 'transaction_filter_presets';
 
 const categoryColors: Record<string, string> = {
   Income: 'bg-green-100 text-green-700 border-green-200',
@@ -30,8 +33,6 @@ export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [selectedAccount, setSelectedAccount] = useState('All Accounts');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [formData, setFormData] = useState({
     description: '',
@@ -41,6 +42,30 @@ export default function TransactionsPage() {
     accountId: '',
     type: 'expense' as 'income' | 'expense',
   });
+  
+  // Advanced filters state
+  const [filters, setFilters] = useState<TransactionFilters>({
+    categories: [],
+    accounts: [],
+    dateRange: { start: '', end: '' },
+    amountRange: { min: 0, max: Infinity },
+    searchQuery: '',
+  });
+  
+  // Filter presets state
+  const [presets, setPresets] = useState<FilterPreset[]>([]);
+  
+  // Load presets from localStorage on mount
+  useEffect(() => {
+    const savedPresets = localStorage.getItem(PRESETS_STORAGE_KEY);
+    if (savedPresets) {
+      try {
+        setPresets(JSON.parse(savedPresets));
+      } catch (err) {
+        console.error('Failed to parse saved presets:', err);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -76,12 +101,71 @@ export default function TransactionsPage() {
   };
 
   const filteredTransactions = transactions.filter((tx) => {
-    const matchesSearch = tx.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesCategory = selectedCategory === 'All' || tx.category === selectedCategory;
-    const matchesAccount = selectedAccount === 'All Accounts' || 
-      (tx.accountId === selectedAccount || accounts.find(a => (a._id || a.id) === tx.accountId)?.name === selectedAccount);
-    return matchesSearch && matchesCategory && matchesAccount;
+    // Search query
+    const matchesSearch = 
+      searchQuery === '' || 
+      tx.description.toLowerCase().includes(searchQuery.toLowerCase());
+
+    // Categories
+    const matchesCategory = 
+      filters.categories.length === 0 || 
+      filters.categories.includes(tx.category);
+
+    // Accounts
+    const matchesAccount = 
+      filters.accounts.length === 0 || 
+      filters.accounts.includes(tx.accountId);
+
+    // Date range
+    const txDate = new Date(tx.date);
+    const matchesDateStart = 
+      filters.dateRange.start === '' || 
+      txDate >= new Date(filters.dateRange.start);
+    const matchesDateEnd = 
+      filters.dateRange.end === '' || 
+      txDate <= new Date(filters.dateRange.end);
+
+    // Amount range
+    const matchesAmountMin = tx.amount >= filters.amountRange.min;
+    const matchesAmountMax = 
+      filters.amountRange.max === Infinity || 
+      tx.amount <= filters.amountRange.max;
+
+    return (
+      matchesSearch &&
+      matchesCategory &&
+      matchesAccount &&
+      matchesDateStart &&
+      matchesDateEnd &&
+      matchesAmountMin &&
+      matchesAmountMax
+    );
   });
+  
+  // Preset management functions
+  const handleSavePreset = (name: string) => {
+    const newPreset: FilterPreset = {
+      id: `preset_${Date.now()}`,
+      name,
+      filters: { ...filters },
+    };
+    const updatedPresets = [...presets, newPreset];
+    setPresets(updatedPresets);
+    localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(updatedPresets));
+    toast.success(`Preset "${name}" saved!`);
+  };
+
+  const handleDeletePreset = (id: string) => {
+    const updatedPresets = presets.filter((p) => p.id !== id);
+    setPresets(updatedPresets);
+    localStorage.setItem(PRESETS_STORAGE_KEY, JSON.stringify(updatedPresets));
+    toast.success('Preset deleted');
+  };
+
+  const handleLoadPreset = (preset: FilterPreset) => {
+    setFilters(preset.filters);
+    toast.success(`Loaded preset "${preset.name}"`);
+  };
 
   const totalIncome = filteredTransactions
     .filter((tx) => tx.type === 'income')
@@ -94,116 +178,78 @@ export default function TransactionsPage() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
-          <p className="text-gray-600 mt-1">Track all your financial transactions</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Transactions</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Track all your financial transactions</p>
         </div>
-        <div className="flex gap-3">
-          <button className="glass-button flex items-center gap-2">
+        <div className="flex gap-3 w-full sm:w-auto">
+          <button className="glass-button flex items-center justify-center gap-2 flex-1 sm:flex-initial">
             <Download className="h-5 w-5" />
-            Export
+            <span className="hidden sm:inline">Export</span>
           </button>
           <button 
             onClick={() => setIsAddModalOpen(true)}
-            className="btn-primary flex items-center gap-2"
+            className="btn-primary flex items-center justify-center gap-2 flex-1 sm:flex-initial"
           >
             <Plus className="h-5 w-5" />
-            Add Transaction
+            <span>Add Transaction</span>
           </button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="glass-card p-6">
-          <p className="text-sm text-gray-600 mb-1">Total Income</p>
-          <p className="text-3xl font-bold text-green-600">{formatCurrency(totalIncome)}</p>
-          <p className="text-sm text-gray-500 mt-2">{filteredTransactions.filter(tx => tx.type === 'income').length} transactions</p>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+        <div className="glass-card p-4 sm:p-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Income</p>
+          <p className="text-2xl sm:text-3xl font-bold text-green-600 dark:text-green-400">{formatCurrency(totalIncome)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">{filteredTransactions.filter(tx => tx.type === 'income').length} transactions</p>
         </div>
-        <div className="glass-card p-6">
-          <p className="text-sm text-gray-600 mb-1">Total Expenses</p>
-          <p className="text-3xl font-bold text-red-600">{formatCurrency(totalExpenses)}</p>
-          <p className="text-sm text-gray-500 mt-2">{filteredTransactions.filter(tx => tx.type === 'expense').length} transactions</p>
+        <div className="glass-card p-4 sm:p-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Expenses</p>
+          <p className="text-2xl sm:text-3xl font-bold text-red-600 dark:text-red-400">{formatCurrency(totalExpenses)}</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">{filteredTransactions.filter(tx => tx.type === 'expense').length} transactions</p>
         </div>
-        <div className="glass-card p-6">
-          <p className="text-sm text-gray-600 mb-1">Net Cash Flow</p>
-          <p className={`text-3xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className="glass-card p-4 sm:p-6">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">Net Cash Flow</p>
+          <p className={`text-2xl sm:text-3xl font-bold ${totalIncome - totalExpenses >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
             {formatCurrency(totalIncome - totalExpenses)}
           </p>
-          <p className="text-sm text-gray-500 mt-2">This period</p>
+          <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">This period</p>
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="glass-card p-6 space-y-4">
-        {/* Search */}
+      {/* Search Bar */}
+      <div className="glass-card p-4 sm:p-6">
         <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400 dark:text-gray-500" />
           <input
             type="text"
             placeholder="Search transactions..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="glass-input pl-12"
+            aria-label="Search transactions"
           />
-        </div>
-
-        {/* Category Filter */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-            <Filter className="h-4 w-4" />
-            Category
-          </label>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`glass-button whitespace-nowrap ${
-                  selectedCategory === category ? 'bg-accent-blue text-white' : ''
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Account Filter */}
-        <div>
-          <label className="text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-            <Building2 className="h-4 w-4" />
-            Account
-          </label>
-          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-            <button
-              onClick={() => setSelectedAccount('All Accounts')}
-              className={`glass-button whitespace-nowrap ${
-                selectedAccount === 'All Accounts' ? 'bg-accent-blue text-white' : ''
-              }`}
-            >
-              All Accounts
-            </button>
-            {accounts.map((account) => (
-              <button
-                key={account._id || account.id}
-                onClick={() => setSelectedAccount(account.name)}
-                className={`glass-button whitespace-nowrap ${
-                  selectedAccount === account.name ? 'bg-accent-blue text-white' : ''
-                }`}
-              >
-                {account.name}
-              </button>
-            ))}
-          </div>
         </div>
       </div>
 
+      {/* Advanced Filters */}
+      <AdvancedFilters
+        filters={filters}
+        onFiltersChange={setFilters}
+        accounts={accounts}
+        categories={categories}
+        presets={presets}
+        onSavePreset={handleSavePreset}
+        onDeletePreset={handleDeletePreset}
+        onLoadPreset={handleLoadPreset}
+      />
+
       {/* Error Message */}
       {error && (
-        <div className="glass-card p-4 bg-red-50 border-red-200">
-          <p className="text-red-600">{error}</p>
+        <div className="glass-card p-4 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800">
+          <p className="text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
 
@@ -220,39 +266,46 @@ export default function TransactionsPage() {
           <div className="glass-card overflow-hidden">
             {filteredTransactions.length === 0 ? (
               <div className="p-12 text-center">
-                <Calendar className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                <p className="text-gray-500 text-lg">No transactions found</p>
-                <p className="text-gray-400 text-sm mt-2">Try adjusting your filters or add a new transaction</p>
+                <Calendar className="h-16 w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+                <p className="text-gray-500 dark:text-gray-400 text-lg font-semibold">No transactions found</p>
+                <p className="text-gray-400 dark:text-gray-500 text-sm mt-2">Try adjusting your filters or add a new transaction</p>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="btn-primary mt-6 inline-flex items-center gap-2"
+                >
+                  <Plus className="h-5 w-5" />
+                  Add Transaction
+                </button>
               </div>
             ) : (
-          <div className="divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 dark:divide-gray-700">
             {filteredTransactions.map((transaction) => (
               <div
                 key={transaction.id}
-                className="p-6 hover:bg-white/50 transition-colors"
+                className="p-4 sm:p-6 hover:bg-white/50 dark:hover:bg-gray-700/30 transition-colors"
               >
-                <div className="flex items-center justify-between">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                   {/* Left side - Icon + Details */}
-                  <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-3 sm:gap-4 flex-1 min-w-0">
                     <div
-                      className={`p-3 rounded-xl ${
+                      className={`p-2 sm:p-3 rounded-xl flex-shrink-0 ${
                         transaction.type === 'income'
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-red-100 text-red-600'
+                          ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400'
+                          : 'bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'
                       }`}
                     >
                       {transaction.type === 'income' ? (
-                        <ArrowDownLeft className="h-6 w-6" />
+                        <ArrowDownLeft className="h-5 w-5 sm:h-6 sm:w-6" />
                       ) : (
-                        <ArrowUpRight className="h-6 w-6" />
+                        <ArrowUpRight className="h-5 w-5 sm:h-6 sm:w-6" />
                       )}
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-gray-900 dark:text-white truncate">
                         {transaction.description}
                       </h3>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-sm text-gray-500">
+                      <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-1">
+                        <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                           {formatDate(transaction.date)}
                         </span>
                         <span
@@ -262,7 +315,7 @@ export default function TransactionsPage() {
                         >
                           {transaction.category}
                         </span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-xs text-gray-400 dark:text-gray-500 truncate">
                           {accounts.find(a => (a._id || a.id) === transaction.accountId)?.name || 'Unknown'}
                         </span>
                       </div>
@@ -270,11 +323,11 @@ export default function TransactionsPage() {
                   </div>
 
                   {/* Right side - Amount + Delete */}
-                  <div className="flex items-center gap-4">
-                    <div className="text-right">
+                  <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto justify-between sm:justify-end">
+                    <div className="text-left sm:text-right">
                       <p
-                        className={`text-2xl font-bold ${
-                          transaction.type === 'income' ? 'text-green-600' : 'text-red-600'
+                        className={`text-xl sm:text-2xl font-bold ${
+                          transaction.type === 'income' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
                         }`}
                       >
                         {transaction.type === 'income' ? '+' : '-'}
@@ -295,10 +348,10 @@ export default function TransactionsPage() {
                           }
                         }
                       }}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                      title="Delete transaction"
+                      className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors flex-shrink-0"
+                      aria-label="Delete transaction"
                     >
-                      <Trash2 className="h-5 w-5 text-red-600" />
+                      <Trash2 className="h-5 w-5 text-red-600 dark:text-red-400" />
                     </button>
                   </div>
                 </div>

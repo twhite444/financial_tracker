@@ -11,7 +11,7 @@ export default defineConfig({
     setupFiles: ['./tests/setup/vitest.setup.ts'],
     
     // Include patterns
-    include: ['tests/unit/**/*.test.ts', 'tests/unit/**/*.spec.ts'],
+    include: ['tests/unit/**/*.test.ts', 'tests/unit/**/*.test.tsx', 'tests/unit/**/*.spec.ts', 'tests/unit/**/*.spec.tsx'],
     
     // Exclude patterns
     exclude: [
