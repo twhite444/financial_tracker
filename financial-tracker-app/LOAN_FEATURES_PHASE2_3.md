@@ -540,21 +540,6 @@ PLAID_ENV=sandbox  # or production
 
 ---
 
-## 💡 Resume/Portfolio Highlights
-
-**"Built a comprehensive loan management system with automatic payment calculations, bank integration via Plaid API, and real-time amortization schedules. Implemented full CRUD operations with 100% test coverage, resulting in a feature-rich financial tracking platform."**
-
-### Key Talking Points:
-- "Integrated Plaid Liabilities API to import loans from 10,000+ financial institutions"
-- "Implemented complex amortization calculations with principal/interest split"
-- "Built real-time extra payment calculator showing potential savings"
-- "Created responsive dashboard widgets with Recharts visualizations"
-- "Achieved 100% test coverage with 24 unit tests and 8 integration tests"
-- "Designed 4-tab modal interface with virtual scrolling for performance"
-- "Implemented transaction linking to track payment history"
-
----
-
 ## 🤝 Contributing
 
 ### Git Workflow

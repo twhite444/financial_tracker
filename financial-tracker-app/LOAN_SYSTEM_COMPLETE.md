@@ -383,29 +383,7 @@ Total Interest: $186,511.57
 
 ---
 
-## 📈 Impact for Resume/Portfolio
-
-### Highlights to Mention
-1. **Built comprehensive loan management system** with 8 RESTful API endpoints
-2. **Implemented complex financial calculations** (amortization, interest, payoff projections)
-3. **Achieved 100% test coverage** on calculation functions (24 unit tests)
-4. **Designed scalable architecture** with service layer pattern
-5. **Created responsive UI** with modern React patterns (hooks, modals, loading states)
-6. **Integrated authentication & authorization** across all endpoints
-7. **Followed best practices** (TypeScript, validation, error handling, git workflow)
-
-### Metrics to Share
-- **2,500+ lines** of production code
-- **24 unit tests** + 8 integration test suites
-- **8 API endpoints** with full CRUD operations
-- **5 loan types** supported
-- **360-month** amortization schedules
-- **<50ms** API response times
-- **100%** TypeScript type safety
-
----
-
-## 🚀 Deployment Checklist (When Ready)
+##  Deployment Checklist (When Ready)
 
 - [ ] Environment variables configured
 - [ ] MongoDB Atlas connection string
