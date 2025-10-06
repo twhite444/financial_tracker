@@ -11,6 +11,7 @@ import AccountsPage from './pages/AccountsPage';
 import PaymentsPage from './pages/PaymentsPage';
 import TransactionsPage from './pages/TransactionsPage';
 import HistoryPage from './pages/HistoryPage';
+import LoansPage from './pages/LoansPage';
 import QuickActions from './components/common/QuickActions';
 
 function App() {
@@ -63,6 +64,7 @@ function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="accounts" element={<AccountsPage />} />
+            <Route path="loans" element={<LoansPage />} />
             <Route path="payments" element={<PaymentsPage />} />
             <Route path="transactions" element={<TransactionsPage />} />
             <Route path="history" element={<HistoryPage />} />

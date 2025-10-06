@@ -7,7 +7,8 @@ import {
   History,
   LogOut,
   Menu,
-  X
+  X,
+  TrendingDown
 } from 'lucide-react';
 import { useState } from 'react';
 import { useAuthStore } from '../../stores/authStore';
@@ -18,6 +19,7 @@ import MobileBottomNav from './MobileBottomNav';
 const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
   { name: 'Accounts', href: '/accounts', icon: Wallet },
+  { name: 'Loans', href: '/loans', icon: TrendingDown },
   { name: 'Payments', href: '/payments', icon: Calendar },
   { name: 'Transactions', href: '/transactions', icon: Receipt },
   { name: 'History', href: '/history', icon: History },
