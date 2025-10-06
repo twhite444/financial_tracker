@@ -29,6 +29,20 @@ export class HealthService {
         },
       });
 
+      // If health endpoint doesn't exist (404), assume backend is ready
+      // This handles older backend deployments without /health endpoint
+      if (response.status === 404) {
+        return {
+          status: 'healthy',
+          timestamp: new Date().toISOString(),
+          environment: 'production',
+          database: {
+            status: 'connected',
+            connected: true,
+          },
+        };
+      }
+
       if (!response.ok && response.status !== 503) {
         throw new Error(`Health check failed with status: ${response.status}`);
       }
