@@ -3,6 +3,7 @@ import { formatCurrency } from '../utils/helpers';
 import { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Modal from '../components/common/Modal';
+import LoanDetailsModal from '../components/loans/LoanDetailsModal';
 import { LoanService } from '../services/data/LoanService';
 import type { Loan, LoanType } from '../models/Loan';
 import { CardSkeleton } from '../components/common/Skeletons';
@@ -538,19 +539,17 @@ export default function LoansPage() {
         </form>
       </Modal>
 
-      {/* Loan Details Modal - To be implemented in next step */}
-      <Modal
-        isOpen={isDetailsModalOpen}
-        onClose={() => {
-          setIsDetailsModalOpen(false);
-          setSelectedLoan(null);
-        }}
-        title="Loan Details"
-      >
-        <div className="text-center py-8 text-gray-500">
-          Loan details view coming soon...
-        </div>
-      </Modal>
+      {/* Loan Details Modal */}
+      {selectedLoan && (
+        <LoanDetailsModal
+          loan={selectedLoan}
+          isOpen={isDetailsModalOpen}
+          onClose={() => {
+            setIsDetailsModalOpen(false);
+            setSelectedLoan(null);
+          }}
+        />
+      )}
     </div>
   );
 }
