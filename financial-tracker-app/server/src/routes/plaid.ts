@@ -4,6 +4,7 @@ import {
   exchangePublicToken,
   syncAccounts,
   syncTransactions,
+  syncLiabilities,
   getLinkStatus,
 } from '../controllers/plaidController';
 import { authenticateToken } from '../middleware/auth';
@@ -24,6 +25,9 @@ router.post('/sync-accounts', syncAccounts);
 
 // Sync transactions from Plaid
 router.post('/sync-transactions', syncTransactions);
+
+// Sync liabilities (loans) from Plaid
+router.post('/sync-liabilities', syncLiabilities);
 
 // Get link status
 router.get('/status', getLinkStatus);

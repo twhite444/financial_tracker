@@ -19,6 +19,8 @@ export interface ILoan extends Document {
   lender?: string;
   notes?: string;
   nextPaymentDate: Date;
+  plaidLinked?: boolean;
+  plaidAccountId?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -99,6 +101,14 @@ const loanSchema = new Schema<ILoan>(
     nextPaymentDate: {
       type: Date,
       required: [true, 'Next payment date is required'],
+    },
+    plaidLinked: {
+      type: Boolean,
+      default: false,
+    },
+    plaidAccountId: {
+      type: String,
+      index: true,
     },
   },
   {

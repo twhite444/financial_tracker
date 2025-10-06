@@ -52,7 +52,7 @@ export const createLinkToken = async (req: AuthRequest, res: Response): Promise<
         client_user_id: userId,
       },
       client_name: 'Financial Tracker',
-      products: [Products.Transactions, Products.Auth],
+      products: [Products.Transactions, Products.Auth, Products.Liabilities],
       country_codes: [CountryCode.Us],
       language: 'en',
     };
@@ -268,6 +268,165 @@ export const syncTransactions = async (req: AuthRequest, res: Response): Promise
   } catch (error) {
     console.error('Error syncing transactions:', error);
     res.status(500).json({ error: 'Failed to sync transactions' });
+  }
+};
+
+/**
+ * Sync liabilities (loans) from Plaid
+ */
+export const syncLiabilities = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.userId;
+
+    if (!userId) {
+      res.status(401).json({ error: 'User not authenticated' });
+      return;
+    }
+
+    const user = await User.findById(userId);
+    
+    if (!user || !user.plaidAccessToken) {
+      res.status(400).json({ error: 'Plaid not connected' });
+      return;
+    }
+
+    // Import Loan model
+    const { Loan } = await import('../models/Loan');
+
+    // Fetch liabilities from Plaid
+    const liabilitiesResponse = await plaidClient.liabilitiesGet({
+      access_token: user.plaidAccessToken,
+    });
+
+    const liabilities = liabilitiesResponse.data.liabilities;
+    const syncedLoans = [];
+
+    // Process credit cards
+    if (liabilities.credit) {
+      for (const creditCard of liabilities.credit) {
+        // Check if loan already exists
+        const existingLoan = await Loan.findOne({
+          userId: user._id,
+          plaidAccountId: creditCard.account_id,
+        });
+
+        if (!existingLoan) {
+          const loanData = {
+            userId: user._id,
+            name: `Credit Card *${creditCard.account_id.slice(-4)}`,
+            loanType: 'other' as const,
+            principal: creditCard.last_statement_balance || 0,
+            interestRate: (creditCard.aprs && creditCard.aprs.length > 0 ? creditCard.aprs[0].apr_percentage / 100 : 0),
+            termMonths: 12, // Default for credit cards
+            startDate: new Date(),
+            monthlyPayment: creditCard.minimum_payment_amount || 0,
+            remainingBalance: creditCard.last_statement_balance || 0,
+            totalPaid: 0,
+            interestPaid: 0,
+            status: 'active' as const,
+            lender: 'Plaid Import (Credit Card)',
+            plaidLinked: true,
+            plaidAccountId: creditCard.account_id,
+            nextPaymentDate: creditCard.next_payment_due_date ? new Date(creditCard.next_payment_due_date) : new Date(),
+          };
+
+          const loan = await Loan.create(loanData);
+          syncedLoans.push(loan);
+        }
+      }
+    }
+
+    // Process student loans
+    if (liabilities.student) {
+      for (const studentLoan of liabilities.student) {
+        const existingLoan = await Loan.findOne({
+          userId: user._id,
+          plaidAccountId: studentLoan.account_id,
+        });
+
+        if (!existingLoan) {
+          const principal = studentLoan.origination_principal_amount || 
+                          (studentLoan.outstanding_interest_amount || 0) * 10 || 
+                          10000;
+          
+          const loanData = {
+            userId: user._id,
+            name: `Student Loan *${studentLoan.account_id.slice(-4)}`,
+            loanType: 'student' as const,
+            principal,
+            interestRate: studentLoan.interest_rate_percentage / 100,
+            termMonths: 120, // Default 10 years for student loans
+            startDate: studentLoan.origination_date ? new Date(studentLoan.origination_date) : new Date(),
+            monthlyPayment: studentLoan.minimum_payment_amount || 0,
+            remainingBalance: principal,
+            totalPaid: 0,
+            interestPaid: 0,
+            status: 'active' as const,
+            lender: 'Plaid Import (Student Loan)',
+            plaidLinked: true,
+            plaidAccountId: studentLoan.account_id,
+            nextPaymentDate: studentLoan.next_payment_due_date ? new Date(studentLoan.next_payment_due_date) : new Date(),
+          };
+
+          const loan = await Loan.create(loanData);
+          syncedLoans.push(loan);
+        }
+      }
+    }
+
+    // Process mortgages
+    if (liabilities.mortgage) {
+      for (const mortgage of liabilities.mortgage) {
+        const existingLoan = await Loan.findOne({
+          userId: user._id,
+          plaidAccountId: mortgage.account_id,
+        });
+
+        if (!existingLoan) {
+          const principal = mortgage.origination_principal_amount || 200000;
+          
+          const loanData = {
+            userId: user._id,
+            name: `Mortgage *${mortgage.account_id.slice(-4)}`,
+            loanType: 'mortgage' as const,
+            principal,
+            interestRate: 0.04, // 4% default
+            termMonths: 360, // Default 30 years
+            startDate: mortgage.origination_date ? new Date(mortgage.origination_date) : new Date(),
+            monthlyPayment: principal * 0.00477, // Rough estimate at 4% for 30 years
+            remainingBalance: principal,
+            totalPaid: 0,
+            interestPaid: 0,
+            status: 'active' as const,
+            lender: 'Plaid Import (Mortgage)',
+            plaidLinked: true,
+            plaidAccountId: mortgage.account_id,
+            nextPaymentDate: new Date(),
+            notes: mortgage.property_address ? `Property: ${mortgage.property_address.street}, ${mortgage.property_address.city}` : undefined,
+          };
+
+          const loan = await Loan.create(loanData);
+          syncedLoans.push(loan);
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Synced ${syncedLoans.length} new loans from Plaid`,
+      loans: syncedLoans,
+      availableTypes: {
+        credit: liabilities.credit?.length || 0,
+        student: liabilities.student?.length || 0,
+        mortgage: liabilities.mortgage?.length || 0,
+      },
+    });
+  } catch (error: any) {
+    console.error('Error syncing liabilities:', error);
+    res.status(500).json({ 
+      error: 'Failed to sync liabilities',
+      details: error.message 
+    });
   }
 };
 
