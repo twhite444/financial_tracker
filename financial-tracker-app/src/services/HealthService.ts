@@ -1,4 +1,6 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+// Health endpoint is at root level, not under /api
+const BACKEND_URL = API_BASE_URL.replace('/api', '');
 
 interface HealthCheckResponse {
   status: 'healthy' | 'unhealthy';
@@ -11,7 +13,7 @@ interface HealthCheckResponse {
 }
 
 export class HealthService {
-  private static readonly HEALTH_ENDPOINT = `${API_URL}/health`;
+  private static readonly HEALTH_ENDPOINT = `${BACKEND_URL}/health`;
   private static readonly MAX_RETRIES = 5;
   private static readonly RETRY_DELAY = 2000; // 2 seconds
 
