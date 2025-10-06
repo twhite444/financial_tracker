@@ -6,11 +6,15 @@ import { motion } from 'framer-motion';
 import { AccountService } from '../services/data/AccountService';
 import { TransactionService } from '../services/data/TransactionService';
 import { PaymentService } from '../services/data/PaymentService';
+import { LoanService } from '../services/data/LoanService';
 import { Account } from '../models/Account';
 import { Transaction } from '../models/Transaction';
 import { PaymentReminder } from '../models/PaymentReminder';
+import type { Loan } from '../models/Loan';
 import { DashboardSkeleton } from '../components/common/Skeletons';
 import FinancialHealthScore from '../components/dashboard/FinancialHealthScore';
+import LoanSummaryWidget from '../components/dashboard/LoanSummaryWidget';
+import DebtProgressWidget from '../components/dashboard/DebtProgressWidget';
 import AnimatedPage from '../components/common/AnimatedPage';
 import { cardContainer, cardItem } from '../utils/animations';
 
@@ -30,6 +34,14 @@ export default function DashboardPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [payments, setPayments] = useState<PaymentReminder[]>([]);
+  const [loans, setLoans] = useState<Loan[]>([]);
+  const [loanSummary, setLoanSummary] = useState({
+    totalDebt: 0,
+    totalMonthlyPayment: 0,
+    totalInterestPaid: 0,
+    loanCount: 0,
+    activeLoans: 0,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -39,10 +51,11 @@ export default function DashboardPage() {
 
   const loadData = async () => {
     setIsLoading(true);
-    const [accResult, txResult, paymentResult] = await Promise.all([
+    const [accResult, txResult, paymentResult, loanResult] = await Promise.all([
       AccountService.getAccounts(),
       TransactionService.getTransactions({ limit: 5 }),
-      PaymentService.getUpcomingPayments(30)
+      PaymentService.getUpcomingPayments(30),
+      LoanService.getLoans()
     ]);
 
     if (accResult.success && accResult.data) {
@@ -57,6 +70,11 @@ export default function DashboardPage() {
 
     if (paymentResult.success && paymentResult.data) {
       setPayments(paymentResult.data);
+    }
+
+    if (loanResult.success && loanResult.data) {
+      setLoans(loanResult.data.loans);
+      setLoanSummary(loanResult.data.summary);
     }
 
     setIsLoading(false);
@@ -126,6 +144,25 @@ export default function DashboardPage() {
   const netWorthData = [
     { month: 'Current', netWorth: netWorth },
   ];
+
+  // Loan data calculations
+  const totalLoanPrincipal = loans.reduce((sum, loan) => sum + loan.principal, 0);
+  const nextPaymentDate = loans.length > 0
+    ? loans.reduce((earliest, loan) => {
+        const loanDate = new Date(loan.nextPaymentDate);
+        return !earliest || loanDate < earliest ? loanDate : earliest;
+      }, null as Date | null)
+    : null;
+
+  // Calculate estimated payoff months (weighted average)
+  const estimatedPayoffMonths = loans.length > 0
+    ? Math.ceil(
+        loans.reduce((sum, loan) => {
+          const monthsLeft = loan.termMonths - Math.floor((loan.principal - loan.remainingBalance) / (loan.monthlyPayment - (loan.remainingBalance * loan.interestRate / 12)));
+          return sum + (monthsLeft * loan.remainingBalance);
+        }, 0) / loanSummary.totalDebt
+      )
+    : 0;
   
   return (
     <AnimatedPage className="space-y-8">
@@ -201,6 +238,25 @@ export default function DashboardPage() {
           </ResponsiveContainer>
         </div>
       </div>
+
+      {/* Loan Widgets */}
+      {loanSummary.loanCount > 0 && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <LoanSummaryWidget
+            totalDebt={loanSummary.totalDebt}
+            monthlyPayment={loanSummary.totalMonthlyPayment}
+            nextPaymentDate={nextPaymentDate}
+            loanCount={loanSummary.loanCount}
+            activeLoans={loanSummary.activeLoans}
+          />
+          <DebtProgressWidget
+            totalPrincipal={totalLoanPrincipal}
+            remainingDebt={loanSummary.totalDebt}
+            totalInterestPaid={loanSummary.totalInterestPaid}
+            estimatedPayoffMonths={estimatedPayoffMonths}
+          />
+        </div>
+      )}
 
       {/* Spending Breakdown Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
