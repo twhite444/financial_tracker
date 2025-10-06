@@ -12,6 +12,11 @@ export interface ITransaction extends Document {
   date: Date;
   merchant?: string;
   tags?: string[];
+  loanId?: mongoose.Types.ObjectId; // Link to Loan for loan payments
+  loanPaymentDetails?: {
+    principalPaid: number;
+    interestPaid: number;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,6 +79,21 @@ const transactionSchema = new Schema<ITransaction>(
     tags: {
       type: [String],
       default: [],
+    },
+    loanId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Loan',
+      index: true,
+    },
+    loanPaymentDetails: {
+      principalPaid: {
+        type: Number,
+        min: 0,
+      },
+      interestPaid: {
+        type: Number,
+        min: 0,
+      },
     },
   },
   {

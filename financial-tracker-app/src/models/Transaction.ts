@@ -10,6 +10,11 @@ export interface Transaction {
     date: Date | string;
     merchant?: string;
     tags?: string[];
+    loanId?: string; // Link to Loan for loan payments
+    loanPaymentDetails?: {
+        principalPaid: number;
+        interestPaid: number;
+    };
     createdAt?: Date;
     updatedAt?: Date;
 }

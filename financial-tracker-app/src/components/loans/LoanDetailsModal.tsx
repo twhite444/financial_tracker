@@ -9,10 +9,12 @@ import {
   Clock,
   Building2,
   FileText,
-  X
+  X,
+  Receipt
 } from 'lucide-react';
 import { formatCurrency } from '../../utils/helpers';
 import type { Loan, AmortizationEntry } from '../../models/Loan';
+import type { Account } from '../../models/Account';
 import { 
   calculateMonthlyPayment,
   calculateTotalInterest,
@@ -21,16 +23,18 @@ import {
   generateAmortizationSchedule
 } from '../../models/Loan';
 import { LoanService } from '../../services/data/LoanService';
+import { AccountService } from '../../services/data/AccountService';
 import toast from 'react-hot-toast';
 
 interface LoanDetailsModalProps {
   loan: Loan;
   isOpen: boolean;
   onClose: () => void;
+  onPaymentRecorded?: () => void;
 }
 
-export default function LoanDetailsModal({ loan, isOpen, onClose }: LoanDetailsModalProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'calculator'>('overview');
+export default function LoanDetailsModal({ loan, isOpen, onClose, onPaymentRecorded }: LoanDetailsModalProps) {
+  const [activeTab, setActiveTab] = useState<'overview' | 'schedule' | 'calculator' | 'payment'>('overview');
   const [amortizationSchedule, setAmortizationSchedule] = useState<AmortizationEntry[]>([]);
   const [isLoadingSchedule, setIsLoadingSchedule] = useState(false);
   const [extraPayment, setExtraPayment] = useState<string>('');
@@ -39,12 +43,28 @@ export default function LoanDetailsModal({ loan, isOpen, onClose }: LoanDetailsM
     interestSaved: number;
     newPayoffDate: Date;
   } | null>(null);
+  
+  // Payment form state
+  const [accounts, setAccounts] = useState<Account[]>([]);
+  const [paymentForm, setPaymentForm] = useState({
+    amount: '',
+    date: new Date().toISOString().split('T')[0],
+    accountId: '',
+    createTransaction: true,
+  });
+  const [isRecordingPayment, setIsRecordingPayment] = useState(false);
 
   useEffect(() => {
     if (isOpen && activeTab === 'schedule') {
       loadAmortizationSchedule();
     }
   }, [isOpen, activeTab, loan.id]);
+
+  useEffect(() => {
+    if (isOpen && activeTab === 'payment') {
+      loadAccounts();
+    }
+  }, [isOpen, activeTab]);
 
   useEffect(() => {
     if (extraPayment && parseFloat(extraPayment) > 0) {
@@ -64,6 +84,76 @@ export default function LoanDetailsModal({ loan, isOpen, onClose }: LoanDetailsM
       toast.error(result.error || 'Failed to load amortization schedule');
     }
     setIsLoadingSchedule(false);
+  };
+
+  const loadAccounts = async () => {
+    const result = await AccountService.getAccounts();
+    
+    if (result.success && result.data) {
+      setAccounts(result.data);
+      // Set default account if available
+      if (result.data.length > 0 && !paymentForm.accountId) {
+        setPaymentForm(prev => ({ ...prev, accountId: result.data[0].id || '' }));
+      }
+    } else {
+      toast.error(result.error || 'Failed to load accounts');
+    }
+  };
+
+  const handleRecordPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    const amount = parseFloat(paymentForm.amount);
+    if (isNaN(amount) || amount <= 0) {
+      toast.error('Please enter a valid payment amount');
+      return;
+    }
+
+    if (paymentForm.createTransaction && !paymentForm.accountId) {
+      toast.error('Please select an account for the transaction');
+      return;
+    }
+
+    setIsRecordingPayment(true);
+
+    const result = await LoanService.recordPayment(
+      loan.id,
+      amount,
+      paymentForm.date,
+      paymentForm.createTransaction ? paymentForm.accountId : undefined,
+      paymentForm.createTransaction
+    );
+
+    setIsRecordingPayment(false);
+
+    if (result.success && result.data) {
+      toast.success(`Payment of ${formatCurrency(amount)} recorded successfully! 🎉`);
+      
+      // Show payment breakdown
+      const { paymentBreakdown } = result.data;
+      toast.success(
+        `Principal: ${formatCurrency(paymentBreakdown.principalPaid)} | Interest: ${formatCurrency(paymentBreakdown.interestPaid)}`,
+        { duration: 5000 }
+      );
+
+      // Reset form
+      setPaymentForm({
+        amount: '',
+        date: new Date().toISOString().split('T')[0],
+        accountId: paymentForm.accountId,
+        createTransaction: true,
+      });
+
+      // Notify parent to refresh
+      if (onPaymentRecorded) {
+        onPaymentRecorded();
+      }
+
+      // Switch to overview to see updated balance
+      setActiveTab('overview');
+    } else {
+      toast.error(result.error || 'Failed to record payment');
+    }
   };
 
   const calculateExtraPaymentEffect = () => {
@@ -163,10 +253,10 @@ export default function LoanDetailsModal({ loan, isOpen, onClose }: LoanDetailsM
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-gray-200 dark:border-gray-700 px-6">
+          <div className="flex border-b border-gray-200 dark:border-gray-700 px-6 overflow-x-auto">
             <button
               onClick={() => setActiveTab('overview')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'overview'
                   ? 'border-emerald-600 text-emerald-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -175,8 +265,18 @@ export default function LoanDetailsModal({ loan, isOpen, onClose }: LoanDetailsM
               Overview
             </button>
             <button
+              onClick={() => setActiveTab('payment')}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+                activeTab === 'payment'
+                  ? 'border-emerald-600 text-emerald-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
+              }`}
+            >
+              Record Payment
+            </button>
+            <button
               onClick={() => setActiveTab('schedule')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'schedule'
                   ? 'border-emerald-600 text-emerald-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -186,7 +286,7 @@ export default function LoanDetailsModal({ loan, isOpen, onClose }: LoanDetailsM
             </button>
             <button
               onClick={() => setActiveTab('calculator')}
-              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
                 activeTab === 'calculator'
                   ? 'border-emerald-600 text-emerald-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300'
@@ -365,6 +465,151 @@ export default function LoanDetailsModal({ loan, isOpen, onClose }: LoanDetailsM
                     </p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {activeTab === 'payment' && (
+              <div className="space-y-6">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <Receipt className="text-emerald-600" size={24} />
+                    <h4 className="font-semibold text-gray-900 dark:text-white">
+                      Record Loan Payment
+                    </h4>
+                  </div>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                    Record a payment for this loan. You can optionally link it to a transaction in one of your accounts.
+                  </p>
+
+                  <form onSubmit={handleRecordPayment} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Payment Amount *
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">$</span>
+                          <input
+                            type="number"
+                            value={paymentForm.amount}
+                            onChange={(e) => setPaymentForm(prev => ({ ...prev, amount: e.target.value }))}
+                            placeholder="0.00"
+                            min="0"
+                            step="0.01"
+                            required
+                            className="w-full pl-8 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-600 dark:text-white"
+                          />
+                        </div>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          Regular payment: {formatCurrency(loan.monthlyPayment)}
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Payment Date *
+                        </label>
+                        <input
+                          type="date"
+                          value={paymentForm.date}
+                          onChange={(e) => setPaymentForm(prev => ({ ...prev, date: e.target.value }))}
+                          required
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-600 dark:text-white"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={paymentForm.createTransaction}
+                          onChange={(e) => setPaymentForm(prev => ({ ...prev, createTransaction: e.target.checked }))}
+                          className="w-4 h-4 text-emerald-600 border-gray-300 rounded focus:ring-emerald-500"
+                        />
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                          Create linked transaction
+                        </span>
+                      </label>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 ml-7 mt-1">
+                        This will create a transaction in your selected account to track this payment
+                      </p>
+                    </div>
+
+                    {paymentForm.createTransaction && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Payment Account *
+                        </label>
+                        <select
+                          value={paymentForm.accountId}
+                          onChange={(e) => setPaymentForm(prev => ({ ...prev, accountId: e.target.value }))}
+                          required={paymentForm.createTransaction}
+                          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-emerald-500 dark:bg-gray-600 dark:text-white"
+                        >
+                          <option value="">Select an account</option>
+                          {accounts.map((account) => (
+                            <option key={account.id} value={account.id}>
+                              {account.name} - {formatCurrency(account.balance)}
+                            </option>
+                          ))}
+                        </select>
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                          The payment will be recorded as an expense in this account
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                      <h5 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                        Payment Breakdown Preview
+                      </h5>
+                      {paymentForm.amount && parseFloat(paymentForm.amount) > 0 ? (
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-blue-700 dark:text-blue-300">Principal:</span>
+                            <span className="font-medium text-blue-900 dark:text-blue-100">
+                              {formatCurrency(Math.max(0, parseFloat(paymentForm.amount) - (loan.remainingBalance * loan.interestRate / 12)))}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-700 dark:text-blue-300">Interest:</span>
+                            <span className="font-medium text-blue-900 dark:text-blue-100">
+                              {formatCurrency(loan.remainingBalance * loan.interestRate / 12)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between border-t border-blue-200 dark:border-blue-700 pt-1 mt-1">
+                            <span className="text-blue-700 dark:text-blue-300">New Balance:</span>
+                            <span className="font-bold text-blue-900 dark:text-blue-100">
+                              {formatCurrency(Math.max(0, loan.remainingBalance - Math.max(0, parseFloat(paymentForm.amount) - (loan.remainingBalance * loan.interestRate / 12))))}
+                            </span>
+                          </div>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Enter a payment amount to see the breakdown
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex gap-3 pt-4">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab('overview')}
+                        className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isRecordingPayment}
+                        className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                      >
+                        {isRecordingPayment ? 'Recording...' : 'Record Payment'}
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
 

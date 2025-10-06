@@ -1,5 +1,6 @@
 import { Response } from 'express';
 import { Loan } from '../models/Loan';
+import { Transaction } from '../models/Transaction';
 import { AuthRequest } from '../middleware/auth';
 import { body, validationResult } from 'express-validator';
 
@@ -292,7 +293,7 @@ export const recordLoanPayment = async (req: AuthRequest, res: Response): Promis
   try {
     const { id } = req.params;
     const userId = req.userId;
-    const { paymentAmount, paymentDate } = req.body;
+    const { paymentAmount, paymentDate, accountId, createTransaction } = req.body;
 
     if (!paymentAmount || paymentAmount <= 0) {
       res.status(400).json({ error: 'Valid payment amount is required' });
@@ -330,9 +331,29 @@ export const recordLoanPayment = async (req: AuthRequest, res: Response): Promis
 
     await loan.save();
 
+    // Create linked transaction if requested and accountId provided
+    let transaction = null;
+    if (createTransaction && accountId) {
+      transaction = await Transaction.create({
+        userId,
+        accountId,
+        type: 'expense',
+        category: 'Loan Payment',
+        amount: paymentAmount,
+        description: `Payment for ${loan.name}`,
+        date: paymentDate ? new Date(paymentDate) : new Date(),
+        loanId: loan._id,
+        loanPaymentDetails: {
+          principalPaid: Math.round(principalPayment * 100) / 100,
+          interestPaid: Math.round(interestCharge * 100) / 100,
+        },
+      });
+    }
+
     res.status(200).json({
       message: 'Payment recorded successfully',
       loan,
+      transaction,
       paymentBreakdown: {
         totalPayment: Math.round(paymentAmount * 100) / 100,
         principalPaid: Math.round(principalPayment * 100) / 100,

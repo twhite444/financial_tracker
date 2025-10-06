@@ -548,6 +548,9 @@ export default function LoansPage() {
             setIsDetailsModalOpen(false);
             setSelectedLoan(null);
           }}
+          onPaymentRecorded={() => {
+            loadLoans(); // Refresh loan list after payment
+          }}
         />
       )}
     </div>

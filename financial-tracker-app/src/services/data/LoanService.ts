@@ -227,10 +227,12 @@ export class LoanService {
   static async recordPayment(
     loanId: string, 
     paymentAmount: number, 
-    paymentDate?: string
+    paymentDate?: string,
+    accountId?: string,
+    createTransaction?: boolean
   ): Promise<{ 
     success: boolean; 
-    data?: { loan: Loan; paymentBreakdown: PaymentBreakdown }; 
+    data?: { loan: Loan; paymentBreakdown: PaymentBreakdown; transaction?: any }; 
     error?: string 
   }> {
     try {
@@ -239,7 +241,9 @@ export class LoanService {
         headers: AuthService.getAuthHeaders(),
         body: JSON.stringify({ 
           paymentAmount, 
-          paymentDate: paymentDate || new Date().toISOString() 
+          paymentDate: paymentDate || new Date().toISOString(),
+          accountId,
+          createTransaction
         }),
       });
 
