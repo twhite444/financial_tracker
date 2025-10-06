@@ -1,0 +1,369 @@
+/**
+ * Brand Theme Variables
+ * -------------------------------------------------
+ * All colors, spacing, and animation values in one place.
+ * Change these CSS variables to rebrand the entire application.
+ * 
+ * Current Brand: Casharoo (emerald/kangaroo theme)
+ * To rebrand: Replace color values below with your brand colors.
+ */
+
+:root {
+  /* ==================== PRIMARY BRAND COLORS ==================== */
+  --brand-primary-50: #ecfdf5;
+  --brand-primary-100: #d1fae5;
+  --brand-primary-200: #a7f3d0;
+  --brand-primary-300: #6ee7b7;
+  --brand-primary-400: #34d399;
+  --brand-primary-500: #10b981;   /* Main brand color */
+  --brand-primary-600: #059669;
+  --brand-primary-700: #047857;
+  --brand-primary-800: #065f46;
+  --brand-primary-900: #064e3b;
+  --brand-primary-950: #022c22;me Variables
+ * Kangaroo-themed design system with CSS variables
+ */
+
+:root {
+  /* Primary Roo Colors - Emerald/Green (kangaroo/nature) */
+  --brand-primary-50: #ecfdf5;
+  --brand-primary-100: #d1fae5;
+  --brand-primary-200: #a7f3d0;
+  --brand-primary-300: #6ee7b7;
+  --brand-primary-400: #34d399;
+  --brand-primary-500: #10b981;
+  --brand-primary-600: #059669;
+  --brand-primary-700: #047857;
+  --brand-primary-800: #065f46;
+  --brand-primary-900: #064e3b;
+  --brand-primary-950: #022c22;
+
+  /* Secondary Coin Colors - Amber/Gold (money/coins) */
+  --brand-coin-50: #fffbeb;
+  --brand-coin-100: #fef3c7;
+  --brand-coin-200: #fde68a;
+  --brand-coin-300: #fcd34d;
+  --brand-coin-400: #fbbf24;
+  --brand-coin-500: #f59e0b;
+  --brand-coin-600: #d97706;
+  --brand-coin-700: #b45309;
+  --brand-coin-800: #92400e;
+  --brand-coin-900: #78350f;
+
+  /* Hop Accent Colors - Orange (energy/action) */
+  --brand-hop-50: #fff7ed;
+  --brand-hop-100: #ffedd5;
+  --brand-hop-200: #fed7aa;
+  --brand-hop-300: #fdba74;
+  --brand-hop-400: #fb923c;
+  --brand-hop-500: #f97316;
+  --brand-hop-600: #ea580c;
+  --brand-hop-700: #c2410c;
+  --brand-hop-800: #9a3412;
+  --brand-hop-900: #7c2d12;
+
+  /* Pouch Colors - Teal (savings/storage) */
+  --brand-pouch-50: #f0fdfa;
+  --brand-pouch-100: #ccfbf1;
+  --brand-pouch-200: #99f6e4;
+  --brand-pouch-300: #5eead4;
+  --brand-pouch-400: #2dd4bf;
+  --brand-pouch-500: #14b8a6;
+  --brand-pouch-600: #0d9488;
+  --brand-pouch-700: #0f766e;
+  --brand-pouch-800: #115e59;
+  --brand-pouch-900: #134e4a;
+
+  /* Brand Semantics */
+  --brand-brand-primary: var(--brand-primary-600);
+  --brand-brand-secondary: var(--brand-coin-400);
+  --brand-brand-accent: var(--brand-hop-500);
+  --brand-brand-success: var(--brand-primary-500);
+  --brand-brand-warning: var(--brand-coin-500);
+  --brand-brand-info: var(--brand-pouch-500);
+
+  /* Light Mode */
+  --brand-bg-primary: #ffffff;
+  --brand-bg-secondary: #f9fafb;
+  --brand-bg-tertiary: #f3f4f6;
+  --brand-bg-hover: #f3f4f6;
+  --brand-bg-active: #e5e7eb;
+  
+  --brand-text-primary: #111827;
+  --brand-text-secondary: #6b7280;
+  --brand-text-tertiary: #9ca3af;
+  --brand-text-inverse: #ffffff;
+  
+  --brand-border-light: rgba(0, 0, 0, 0.05);
+  --brand-border-medium: rgba(0, 0, 0, 0.1);
+  --brand-border-strong: rgba(0, 0, 0, 0.2);
+
+  /* Shadows */
+  --brand-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --brand-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --brand-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --brand-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  
+  /* Kangaroo-themed shadow (greenish glow) */
+  --brand-shadow-roo: 0 4px 14px 0 rgba(16, 185, 129, 0.15);
+  --brand-shadow-coin: 0 4px 14px 0 rgba(245, 158, 11, 0.2);
+
+  /* Spacing (based on 4px grid, kangaroo hop metaphor) */
+  --brand-space-hop-xs: 0.25rem;   /* 4px - tiny hop */
+  --brand-space-hop-sm: 0.5rem;    /* 8px - small hop */
+  --brand-space-hop-md: 1rem;      /* 16px - medium hop */
+  --brand-space-hop-lg: 1.5rem;    /* 24px - big hop */
+  --brand-space-hop-xl: 2rem;      /* 32px - huge hop */
+  --brand-space-hop-2xl: 3rem;     /* 48px - mega hop */
+  --brand-space-hop-3xl: 4rem;     /* 64px - kangaroo leap */
+
+  /* Border Radius (pouch-like rounded corners) */
+  --brand-radius-sm: 0.375rem;     /* 6px */
+  --brand-radius-md: 0.5rem;       /* 8px */
+  --brand-radius-lg: 0.75rem;      /* 12px */
+  --brand-radius-xl: 1rem;         /* 16px */
+  --brand-radius-2xl: 1.5rem;      /* 24px */
+  --brand-radius-3xl: 2rem;        /* 32px - pouch shape */
+  --brand-radius-full: 9999px;     /* pill shape */
+
+  /* Typography */
+  --brand-font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --brand-font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  
+  /* Font Weights */
+  --brand-font-light: 300;
+  --brand-font-normal: 400;
+  --brand-font-medium: 500;
+  --brand-font-semibold: 600;
+  --brand-font-bold: 700;
+
+  /* Transitions */
+  --brand-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --brand-transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --brand-transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --brand-transition-hop: 400ms cubic-bezier(0.34, 1.56, 0.64, 1); /* bouncy like a kangaroo hop */
+
+  /* Z-Index Stack */
+  --brand-z-base: 0;
+  --brand-z-dropdown: 1000;
+  --brand-z-sticky: 1020;
+  --brand-z-fixed: 1030;
+  --brand-z-modal-backdrop: 1040;
+  --brand-z-modal: 1050;
+  --brand-z-popover: 1060;
+  --brand-z-tooltip: 1070;
+  --brand-z-toast: 1080;
+}
+
+/* Dark Mode Variables */
+.dark {
+  /* Dark Mode Backgrounds */
+  --brand-bg-primary: #0a0a0a;
+  --brand-bg-secondary: #171717;
+  --brand-bg-tertiary: #262626;
+  --brand-bg-hover: #262626;
+  --brand-bg-active: #404040;
+  
+  /* Dark Mode Text */
+  --brand-text-primary: #fafafa;
+  --brand-text-secondary: #a3a3a3;
+  --brand-text-tertiary: #737373;
+  --brand-text-inverse: #0a0a0a;
+  
+  /* Dark Mode Borders */
+  --brand-border-light: rgba(255, 255, 255, 0.05);
+  --brand-border-medium: rgba(255, 255, 255, 0.1);
+  --brand-border-strong: rgba(255, 255, 255, 0.2);
+
+  /* Dark Mode Shadows */
+  --brand-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --brand-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --brand-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.4);
+  --brand-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6), 0 10px 10px -5px rgba(0, 0, 0, 0.5);
+  
+  /* Dark Mode Kangaroo Shadows */
+  --brand-shadow-roo: 0 4px 14px 0 rgba(16, 185, 129, 0.25);
+  --brand-shadow-coin: 0 4px 14px 0 rgba(245, 158, 11, 0.3);
+}
+
+/* Utility Classes for Casharoo Theme */
+.brand-gradient-roo {
+  background: linear-gradient(135deg, var(--brand-primary-500) 0%, var(--brand-primary-700) 100%);
+}
+
+.brand-gradient-coin {
+  background: linear-gradient(135deg, var(--brand-coin-400) 0%, var(--brand-coin-600) 100%);
+}
+
+.brand-gradient-hop {
+  background: linear-gradient(135deg, var(--brand-hop-400) 0%, var(--brand-hop-600) 100%);
+}
+
+.brand-gradient-aurora {
+  background: radial-gradient(60% 60% at 20% 10%, rgba(16, 185, 129, 0.35), transparent),
+              radial-gradient(40% 40% at 80% 20%, rgba(245, 158, 11, 0.25), transparent),
+              radial-gradient(50% 50% at 50% 80%, rgba(16, 185, 129, 0.25), transparent);
+}
+
+.brand-glass {
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--brand-border-light);
+}
+
+.dark .brand-glass {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--brand-border-medium);
+}
+
+/* Kangaroo Hop Animation */
+@keyframes brand-hop {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+  }
+  50% {
+    transform: translateY(-12px) scale(1.05);
+  }
+}
+
+.brand-hop-animation {
+  animation: brand-hop 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) infinite;
+}
+
+/* Coin Flip Animation */
+@keyframes brand-coin-flip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+.brand-coin-flip {
+  animation: brand-coin-flip 1.5s linear infinite;
+  transform-style: preserve-3d;
+}
+
+/* Pulse Glow Animation */
+@keyframes brand-pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+}
+
+.brand-pulse-glow {
+  animation: brand-pulse-glow 2s ease-in-out infinite;
+}
+
+/* Pouch Bounce Animation */
+@keyframes brand-pouch-bounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.brand-pouch-bounce {
+  animation: brand-pouch-bounce 0.6s ease-in-out;
+}
+
+/* Focus Styles */
+.brand-focus {
+  outline: 2px solid var(--brand-primary-500);
+  outline-offset: 2px;
+}
+
+/* Button Styles */
+.brand-btn-primary {
+  background: var(--brand-brand-primary);
+  color: var(--brand-text-inverse);
+  padding: var(--brand-space-hop-sm) var(--brand-space-hop-lg);
+  border-radius: var(--brand-radius-xl);
+  font-weight: var(--brand-font-medium);
+  transition: all var(--brand-transition-base);
+  box-shadow: var(--brand-shadow-roo);
+}
+
+.brand-btn-primary:hover {
+  background: var(--brand-primary-700);
+  box-shadow: var(--brand-shadow-lg);
+  transform: translateY(-1px);
+}
+
+.brand-btn-primary:active {
+  transform: translateY(0);
+  box-shadow: var(--brand-shadow-sm);
+}
+
+.brand-btn-secondary {
+  background: transparent;
+  color: var(--brand-brand-primary);
+  padding: var(--brand-space-hop-sm) var(--brand-space-hop-lg);
+  border-radius: var(--brand-radius-xl);
+  border: 1px solid var(--brand-brand-primary);
+  font-weight: var(--brand-font-medium);
+  transition: all var(--brand-transition-base);
+}
+
+.brand-btn-secondary:hover {
+  background: var(--brand-primary-50);
+}
+
+.dark .brand-btn-secondary:hover {
+  background: var(--brand-primary-950);
+}
+
+/* Card Styles */
+.brand-card {
+  background: var(--brand-bg-primary);
+  border: 1px solid var(--brand-border-light);
+  border-radius: var(--brand-radius-2xl);
+  padding: var(--brand-space-hop-lg);
+  box-shadow: var(--brand-shadow-md);
+  transition: all var(--brand-transition-base);
+}
+
+.brand-card:hover {
+  box-shadow: var(--brand-shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Input Styles */
+.brand-input {
+  background: var(--brand-bg-secondary);
+  border: 1px solid var(--brand-border-medium);
+  border-radius: var(--brand-radius-lg);
+  padding: var(--brand-space-hop-sm) var(--brand-space-hop-md);
+  color: var(--brand-text-primary);
+  transition: all var(--brand-transition-base);
+}
+
+.brand-input:focus {
+  outline: none;
+  border-color: var(--brand-brand-primary);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Badge Styles */
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--brand-space-hop-xs) var(--brand-space-hop-sm);
+  border-radius: var(--brand-radius-full);
+  font-size: 0.75rem;
+  font-weight: var(--brand-font-medium);
+  background: var(--brand-primary-100);
+  color: var(--brand-primary-800);
+}
+
+.dark .brand-badge {
+  background: var(--brand-primary-900);
+  color: var(--brand-primary-200);
+}

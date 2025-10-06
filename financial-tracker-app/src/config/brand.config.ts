@@ -8,18 +8,18 @@
 export const brandConfig = {
   // Brand Identity
   name: {
-    full: 'Casharoo',
-    short: 'Casharoo',
+    full: 'brand',
+    short: 'brand',
     tagline: 'Personal finance, with personality.',
   },
 
   // Logo Assets (all paths relative to public/)
   assets: {
-    mark: '/logos/casharoo-mark.png',           // Main icon/mark
-    coin: '/logos/casharoo-coin.png',           // Circular variant
-    wordmark: '/logos/casharoo-wordmark.png',   // Horizontal text logo
-    fullLogo: '/logos/casharoo-full-logo.png',  // Mark + wordmark combined
-    favicon: '/logos/casharoo-favicon.png',     // Browser icon
+    mark: '/logos/brand-mark.png',           // Main icon/mark
+    coin: '/logos/brand-coin.png',           // Circular variant
+    wordmark: '/logos/brand-wordmark.png',   // Horizontal text logo
+    fullLogo: '/logos/brand-full-logo.png',  // Mark + wordmark combined
+    favicon: '/logos/brand-favicon.png',     // Browser icon
   },
 
   // Logo Display Sizes (Tailwind classes)
