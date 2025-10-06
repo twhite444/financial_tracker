@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import { connectDatabase } from './config/database';
 import { securityHeaders, sanitizeErrorResponse } from './middleware/security';
 
@@ -59,12 +60,26 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('combined'));
 }
 
-// Health check endpoint
+// Health check endpoint with MongoDB connection status
 app.get('/health', (_req: Request, res: Response) => {
-  res.status(200).json({
-    status: 'healthy',
+  const dbState = mongoose.connection.readyState;
+  const dbStatus = {
+    0: 'disconnected',
+    1: 'connected',
+    2: 'connecting',
+    3: 'disconnecting',
+  }[dbState] || 'unknown';
+
+  const isHealthy = dbState === 1;
+
+  res.status(isHealthy ? 200 : 503).json({
+    status: isHealthy ? 'healthy' : 'unhealthy',
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'development',
+    database: {
+      status: dbStatus,
+      connected: isHealthy,
+    },
   });
 });
 
