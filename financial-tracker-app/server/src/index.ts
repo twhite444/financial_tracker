@@ -22,6 +22,9 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust proxy for Render deployment (fixes rate limiter with X-Forwarded-For header)
+app.set('trust proxy', 1);
+
 // Connect to MongoDB
 connectDatabase();
 
@@ -30,9 +33,14 @@ app.use(helmet()); // Basic security headers
 app.use(securityHeaders); // Additional security headers
 app.use(
   cors({
-    origin: process.env.NODE_ENV === 'development' 
-      ? /^http:\/\/localhost:\d+$/  // Allow all localhost ports in development
-      : process.env.CORS_ORIGIN || 'http://localhost:5173',
+    origin: [
+      'https://financial-tracker-app-coral.vercel.app',
+      'http://localhost:5173',
+      'http://localhost:5174',
+      'http://localhost:3000'
+    ],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
   })
 ); // CORS
